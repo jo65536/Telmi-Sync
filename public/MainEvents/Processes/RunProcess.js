@@ -27,7 +27,7 @@ function runProcess(mainWindow, jsFile, arrayParams, onSuccess, onProgress, onEr
     } else {
       if (progress.length < 5) {
         taskProcess.kill()
-        onError()
+        onError('Unexpected process output : ' + data.toString())
       } else {
         if (progress[progress.length - 4] !== 'error-warning') {
           onProgress(progress[progress.length - 4], progress[progress.length - 3], progress[progress.length - 2])
