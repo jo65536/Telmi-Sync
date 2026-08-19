@@ -42,6 +42,7 @@ function StoriesTable({
                         className,
                         id,
                         emptyMessage,
+                        titleLocaleKey,
                         onPlay,
                         onAdd,
                         onStudio,
@@ -178,7 +179,7 @@ function StoriesTable({
 
   useEffect(() => {setIsLoadingStories(false)}, [stories, setIsLoadingStories])
 
-  return <Table titleLeft={getLocale('stories-local', flatTableStories.length)}
+  return <Table titleLeft={getLocale(titleLocaleKey || 'stories-local', flatTableStories.length)}
                 titleRight={selectedStories.length ? getLocale('stories-selected', selectedStories.length) : undefined}
                 className={className}
                 id={id}

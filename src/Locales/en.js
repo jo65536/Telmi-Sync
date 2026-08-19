@@ -327,6 +327,8 @@ const en = {
   'column-updated': 'Updated',
   'column-downloads': 'Downloads',
   'column-date': 'Date',
+  'stories-telmios': '{0} story(ies) on the Telmi',
+  'musics-telmios': '{0} track(s) on the Telmi',
   'import-dialog-medias': 'Stories, packs and musics',
   'import-dialog-all': 'All files',
   'spotify-show-not-found': 'Could not find a public RSS feed for this Spotify podcast. Spotify-hosted exclusive shows cannot be downloaded — otherwise, add the podcast\'s RSS feed URL directly.',

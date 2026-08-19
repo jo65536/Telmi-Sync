@@ -1,7 +1,7 @@
 {
   "name": "telmi-sync",
   "description": "Desktop application for synchronize stories and music with Telmi OS.",
-  "version": "0.17.0",
+  "version": "0.17.0-home.3",
   "author": {
     "name": "Franck ALARY",
     "url": "http://dantsu.com/"
@@ -13,7 +13,7 @@
   "scripts": {
     "start": "concurrently \"cross-env BROWSER=none react-scripts start\" \"wait-on http://localhost:3000 && electron .\"",
     "build": "react-scripts build && electron-builder --x64",
-    "build:mac": "react-scripts build && electron-builder --mac --x64 && electron-builder --mac --arm64 -c.mac.artifactName='${productName}-${version}-silicon.${ext}'"
+    "build:mac": "react-scripts build && electron-builder --mac --universal"
   },
   "private": false,
   "dependencies": {
@@ -57,7 +57,21 @@
       "extendInfo": {
         "NSMicrophoneUsageDescription": "Access to your microphone is needed for record your voice",
         "com.apple.security.device.audio-input": true
-      }
+      },
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ]
     },
     "linux": {
       "target": [
