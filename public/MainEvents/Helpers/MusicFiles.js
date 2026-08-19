@@ -24,18 +24,16 @@ const
             return acc
           }
 
-          return [
-            ...acc,
-            {
-              id: name,
-              music: musicPath,
-              image: imagePath + '?t=' + Math.trunc(Date.now() / 10000),
-              track: parseInt(track, 10),
-              title,
-              album,
-              artist
-            }
-          ]
+          acc.push({
+            id: name,
+            music: musicPath,
+            image: imagePath + '?t=' + Math.trunc(Date.now() / 10000),
+            track: parseInt(track, 10),
+            title,
+            album,
+            artist
+          })
+          return acc
         },
         []
       )

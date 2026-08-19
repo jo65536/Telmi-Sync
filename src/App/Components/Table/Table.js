@@ -56,15 +56,16 @@ function Table({
 
     onSearch = useCallback(
       () => {
-        if (searchInput === null) {
+        if (searchInput.current == null) {
           return
         }
 
         setTableState((tableState) => {
-          if (tableState.search === searchInput.current.value) {
+          if (tableState !== null && tableState.search === searchInput.current.value) {
             return tableState
           }
           return {
+            group: {},
             ...tableState,
             search: searchInput.current.value
           }
@@ -75,15 +76,16 @@ function Table({
           return
         }
 
-        const regSearch = '.*(' + searchInput.current.value.split(' ').map(regExpEscape).join(').*(') + ').*'
+        const
+          regSearch = new RegExp('.*(' + searchInput.current.value.split(' ').map(regExpEscape).join(').*(') + ').*', 'i')
         setDataFiltered(
           data.reduce(
             (acc, d) => {
               if (d.tableGroup !== undefined) {
                 const
-                  testGroup = new RegExp(regSearch, 'gi').test(d.tableGroup),
+                  testGroup = regSearch.test(d.tableGroup),
                   children = d.tableChildren.filter(
-                    (d) => testGroup || new RegExp(regSearch, 'gi').test(d.cellTitle) || new RegExp(regSearch, 'gi').test(d.cellSubtitle)
+                    (d) => testGroup || regSearch.test(d.cellTitle) || regSearch.test(d.cellSubtitle)
                   )
                 if (children.length) {
                   return [
@@ -95,7 +97,7 @@ function Table({
                   ]
                 }
               } else {
-                if (new RegExp(regSearch, 'gi').test(d.cellTitle) || new RegExp(regSearch, 'gi').test(d.cellSubtitle)) {
+                if (regSearch.test(d.cellTitle) || regSearch.test(d.cellSubtitle)) {
                   return [...acc, d]
                 }
               }
@@ -200,7 +202,7 @@ function Table({
 
   useEffect(
     () => {
-      if (searchInput === null || tableState === null) {
+      if (searchInput.current == null || tableState === null) {
         return
       }
       searchInput.current.value = tableState.search

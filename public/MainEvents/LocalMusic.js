@@ -110,7 +110,7 @@ function mainEventLocalMusicReader(mainWindow) {
   ipcMain.on(
     'local-musics-update',
     async (event, musics) => {
-      if (!Array.isArray(musics) && !musics.length) {
+      if (!Array.isArray(musics) || !musics.length) {
         return
       }
       localMusicUpdate(musics)

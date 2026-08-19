@@ -13,25 +13,45 @@ function runProcess(mainWindow, jsFile, arrayParams, onSuccess, onProgress, onEr
       {stdio: 'pipe'}
     )
 
+  // Children write '*message*current*total*' frames plus a final bare
+  // 'success' token. Pipe chunks are not aligned to writes, so frames are
+  // reassembled across chunk boundaries instead of assuming one chunk = one
+  // whole frame (a split frame used to kill a healthy task as an error).
+  let stdoutBuffer = ''
+
   taskProcess.stdout.on('data', (data) => {
-    const progress = data.toString().split('*')
-    console.log(progress)
+    stdoutBuffer += data.toString()
 
-    progress.forEach((p, k) =>
-      p === 'error-warning' && mainWindow.webContents.send(p, {title: progress[k + 1], message: progress[k + 2]})
-    )
-
-    if (progress[progress.length - 1] === 'success') {
-      taskProcess.kill()
-      onSuccess()
-    } else {
-      if (progress.length < 5) {
+    while (stdoutBuffer !== '') {
+      if (stdoutBuffer.substring(0, 7) === 'success') {
         taskProcess.kill()
-        onError('unexpected-process-output : ' + data.toString())
-      } else {
-        if (progress[progress.length - 4] !== 'error-warning') {
-          onProgress(progress[progress.length - 4], progress[progress.length - 3], progress[progress.length - 2])
+        onSuccess()
+        return
+      }
+
+      if (stdoutBuffer.charAt(0) !== '*') {
+        if ('success'.substring(0, stdoutBuffer.length) === stdoutBuffer) {
+          // partial 'success' token: wait for the next chunk
+          return
         }
+        taskProcess.kill()
+        onError('unexpected-process-output : ' + stdoutBuffer)
+        return
+      }
+
+      const parts = stdoutBuffer.split('*')
+      if (parts.length < 5) {
+        // incomplete frame: wait for the next chunk
+        return
+      }
+
+      const [, message, current, total] = parts
+      stdoutBuffer = stdoutBuffer.substring(message.length + current.length + total.length + 4)
+
+      if (message === 'error-warning') {
+        mainWindow.webContents.send('error-warning', {title: current, message: total})
+      } else {
+        onProgress(message, current, total)
       }
     }
   })
