@@ -10,7 +10,7 @@
 }
 
 .button:hover {
-  color: $white;
+  color: $accent;
 }
 
 .buttonRounded {
@@ -25,4 +25,5 @@
 
 .buttonRounded:hover {
   color: $white;
+  background-color: $accentDark;
 }

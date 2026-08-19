@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useRef, useState} from 'react'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useLocale} from '../Locale/LocaleHooks.js'
 import {regExpEscape} from '../../Helpers/String.js'
 import {useElectronEmitter, useElectronListener} from '../Electron/Hooks/UseElectronEvent.js'
@@ -7,6 +7,7 @@ import {findData, isCellSelected, orderIndexes} from './TableHelpers.js'
 import TableHeaderIcon from './TableHeaderIcon.js'
 import TableCell from './TableCell.js'
 import TableGroup from './TableGroup.js'
+import TableListRow from './TableListRow.js'
 
 import Loader from '../Loader/Loader.js'
 
@@ -17,6 +18,8 @@ import ButtonIconPen from '../Buttons/Icons/ButtonIconPen.js'
 import ButtonIconWave from '../Buttons/Icons/ButtonIconWave.js'
 import ButtonIconPlus from '../Buttons/Icons/ButtonIconPlus.js'
 import ButtonIconXMark from '../Buttons/Icons/ButtonIconXMark.js'
+import ButtonIconListView from '../Buttons/Icons/ButtonIconListView.js'
+import ButtonIconGridView from '../Buttons/Icons/ButtonIconGridView.js'
 
 import styles from './Table.module.scss'
 
@@ -52,6 +55,8 @@ function Table({
     {getLocale} = useLocale(),
     [tableState, setTableState] = useState(null),
     [dataFiltered, setDataFiltered] = useState([]),
+    [listSort, setListSort] = useState({field: 'title', asc: true}),
+    viewMode = (tableState !== null && tableState.view === 'list') ? 'list' : 'grid',
     searchInput = useRef(),
 
     onSearch = useCallback(
@@ -161,6 +166,68 @@ function Table({
       [dataFiltered, onSelect, selectedData]
     ),
 
+    onToggleView = useCallback(
+      () => setTableState((tableState) => ({
+        search: '',
+        group: {},
+        ...tableState,
+        view: (tableState !== null && tableState.view === 'list') ? 'grid' : 'list'
+      })),
+      [setTableState]
+    ),
+
+    onListSortBy = useCallback(
+      (field) => setListSort((listSort) => ({
+        field,
+        asc: listSort.field === field ? !listSort.asc : true
+      })),
+      [setListSort]
+    ),
+
+    listRows = useMemo(
+      () => {
+        if (viewMode !== 'list') {
+          return []
+        }
+        const
+          rows = dataFiltered.reduce(
+            (acc, d) => {
+              if (d.tableGroup !== undefined) {
+                acc.push(...d.tableChildren)
+              } else {
+                acc.push(d)
+              }
+              return acc
+            },
+            []
+          ),
+          dir = listSort.asc ? 1 : -1,
+          key = listSort.field === 'title' ? 'cellTitle' : 'cellSubtitle'
+        return rows.sort((a, b) => dir * String(a[key] || '').localeCompare(String(b[key] || ''), undefined, {numeric: true}))
+      },
+      [dataFiltered, viewMode, listSort]
+    ),
+
+    onListSelect = useCallback(
+      (e, data) => {
+        if (typeof onSelect !== 'function') {
+          return
+        }
+        if (e.shiftKey && Array.isArray(selectedData) && selectedData.length) {
+          const
+            lastDataClicked = selectedData[selectedData.length - 1],
+            i1 = listRows.findIndex((r) => r.cellId === lastDataClicked.cellId),
+            i2 = listRows.findIndex((r) => r.cellId === data.cellId)
+          if (i1 !== -1 && i2 !== -1) {
+            const [a, b] = i1 < i2 ? [i1, i2] : [i2, i1]
+            return onSelect(listRows.slice(a, b + 1))
+          }
+        }
+        onSelect(data)
+      },
+      [onSelect, selectedData, listRows]
+    ),
+
     onSelectAllCallback = useCallback(
       () => typeof onSelectAll === 'function' && onSelectAll(
         dataFiltered.reduce(
@@ -180,6 +247,7 @@ function Table({
       }
       setTableState({
         search: tableState === null ? '' : tableState.search,
+        view: (tableState !== null && tableState.view === 'list') ? 'list' : 'grid',
         group: data.reduce(
           (acc, v) => {
             if (v.tableGroup === undefined) {
@@ -273,6 +341,12 @@ function Table({
         </ul>
       }
 
+      <ul className={styles.headerIcons}>
+        <TableHeaderIcon componentIcon={viewMode === 'list' ? ButtonIconGridView : ButtonIconListView}
+                         title={viewMode === 'list' ? 'view-grid' : 'view-list'}
+                         onClick={onToggleView}/>
+      </ul>
+
       <div className={styles.headerSearchContainer}>
         <input type="text"
                placeholder={getLocale('search') + '...'}
@@ -294,7 +368,37 @@ function Table({
               (emptyMessage || getLocale('table-empty'))
           }</p>
         }
-        <ul className={styles.cells}>{
+        {
+          viewMode === 'list' && dataFiltered.length > 0 &&
+          <ul className={styles.listView}>
+            <li className={styles.listViewHeader}>
+              <span className={styles.listViewHeaderImage}/>
+              <button className={styles.listViewHeaderCol}
+                      onClick={() => onListSortBy('title')}>
+                {getLocale('column-name') + (listSort.field === 'title' ? (listSort.asc ? ' \u25b4' : ' \u25be') : '')}
+              </button>
+              <button className={styles.listViewHeaderCol}
+                      onClick={() => onListSortBy('subtitle')}>
+                {getLocale('column-details') + (listSort.field === 'subtitle' ? (listSort.asc ? ' \u25b4' : ' \u25be') : '')}
+              </button>
+              <span className={styles.listViewHeaderActions}/>
+            </li>
+            {
+              listRows.map((v, k) => <TableListRow key={'row-' + k}
+                                                   data={v}
+                                                   selected={isCellSelected(selectedData, v)}
+                                                   onSelect={onListSelect}
+                                                   onPlay={onPlay}
+                                                   onStudio={onStudio}
+                                                   onOptimizeAudio={onOptimizeAudio}
+                                                   onEdit={onEdit}
+                                                   onInfo={onInfo}
+                                                   onDownload={onDownload}
+                                                   onDelete={onDelete}/>)
+            }
+          </ul>
+        }
+        {viewMode !== 'list' && <ul className={styles.cells}>{
           dataFiltered.map((v, k) => {
             if (v.tableGroup !== undefined) {
               return <TableGroup key={'cell-' + k}
@@ -325,7 +429,7 @@ function Table({
                                 onDelete={onDelete}/>
             }
           })
-        }</ul>
+        }</ul>}
       </div>
     </div>
     {isLoading && <Loader/>}
