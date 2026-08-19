@@ -1,4 +1,5 @@
 import {ipcMain} from 'electron'
+import {isSpotifyShowUrl, resolveSpotifyShowToRss} from './Helpers/SpotifyPodcast.js'
 import * as fs from 'fs'
 import {getStoresPath, initTmpPath} from './Helpers/AppPaths.js'
 import {requestJson, requestJsonOrXml} from './Helpers/Request.js'
@@ -57,6 +58,19 @@ function mainEventStores(mainWindow) {
     'store-add',
     async (event, store) => {
       if (checkStore(store)) {
+        if (isSpotifyShowUrl(store.url)) {
+          // A Spotify show page is not a feed: resolve it to the podcast's
+          // canonical RSS feed, or explain why it cannot be added.
+          try {
+            const resolved = await resolveSpotifyShowToRss(store.url)
+            if (resolved === null) {
+              return mainWindow.webContents.send('error-warning', {title: 'spotify-show-not-found', message: store.url})
+            }
+            store = {...store, url: resolved.feedUrl}
+          } catch (e) {
+            return mainWindow.webContents.send('error-warning', {title: 'spotify-show-not-found', message: e.toString()})
+          }
+        }
         const
           storesPath = getStoresPath('stores.json'),
           storesContent = fs.existsSync(storesPath) ? JSON.parse(fs.readFileSync(storesPath).toString('utf8')) : {stores: []}

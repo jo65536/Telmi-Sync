@@ -5,12 +5,21 @@ import {musicClassification} from './MusicClassification.js'
 import {isCellSelected} from '../../../Components/Table/TableHelpers.js'
 import Table from '../../../Components/Table/Table.js'
 import TableHeaderIcon from '../../../Components/Table/TableHeaderIcon.js'
+import {formatBytes} from '../../../Helpers/String.js'
 import ButtonIconSort from '../../../Components/Buttons/Icons/ButtonIconSort.js'
 import ModalMusicFormUpdate from './ModalMusicFormUpdate.js'
 import ModalMusicDeleteConfirm from './ModalMusicDeleteConfirm.js'
 import ModalMusicsDeleteConfirm from './ModalMusicsDeleteConfirm.js'
 import ModalMusicsFormUpdate from './ModalMusicsFormUpdate.js'
 
+
+const musicListColumns = [
+  {key: 'title', locale: 'column-title', flex: 3},
+  {key: 'artist', locale: 'column-artist', flex: 2},
+  {key: 'album', locale: 'column-album', flex: 2},
+  {key: 'track', locale: 'column-track', flex: 1},
+  {key: 'size', locale: 'column-size', flex: 1, format: formatBytes}
+]
 
 const sortTableData = (data, asc) => {
   const
@@ -175,6 +184,7 @@ function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, o
                 onDeleteSelected={onCallbackDeleteSelected}
                 isLoading={isLoadingMusics}
                 emptyMessage={emptyMessage}
+                listColumns={musicListColumns}
                 additionalHeaderButtons={<TableHeaderIcon componentIcon={ButtonIconSort}
                                                           title={isSortedAsc ? 'sorted-asc' : 'sorted-desc'}
                                                           onClick={onToggleSort}/>}/>

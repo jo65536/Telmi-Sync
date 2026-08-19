@@ -38,4 +38,17 @@ const
     return html.replaceAll(/<\/p>|<br>|<br\/>|<br \/>/g, '\n').replaceAll(/<[^>]+>/g, '').replaceAll('&nbsp;', ' ')
   }
 
-export {printf, stringSlugify, regExpEscape, stripHtmlTags}
+const formatBytes = (bytes) => {
+  if (typeof bytes !== 'number' || !isFinite(bytes)) {
+    return ''
+  }
+  if (bytes >= 1073741824) {
+    return (bytes / 1073741824).toFixed(1) + ' Go'
+  }
+  if (bytes >= 1048576) {
+    return (bytes / 1048576).toFixed(1) + ' Mo'
+  }
+  return Math.max(1, Math.round(bytes / 1024)) + ' Ko'
+}
+
+export {printf, stringSlugify, regExpEscape, stripHtmlTags, formatBytes}

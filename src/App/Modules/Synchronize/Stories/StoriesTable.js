@@ -12,6 +12,12 @@ import ModalStoriesDeleteConfirm from './ModalStoriesDeleteConfirm.js'
 import ModalStoriesFormUpdate from './ModalStoriesFormUpdate.js'
 
 
+const storiesListColumns = [
+  {key: 'title', locale: 'column-name', flex: 3},
+  {key: 'category', locale: 'column-category', flex: 2},
+  {key: 'age', locale: 'column-age', flex: 1}
+]
+
 const sortTableData = (data, asc) => {
   const
     dir = asc ? 1 : -1,
@@ -196,7 +202,8 @@ function StoriesTable({
                   {additionalHeaderButtons || null}
                 </>}
                 isLoading={isLoadingStories}
-                emptyMessage={emptyMessage}/>
+                emptyMessage={emptyMessage}
+                listColumns={storiesListColumns}/>
 }
 
 

@@ -9,6 +9,15 @@ import ModalStoreDownload from './ModalStoreDownload.js'
 
 import styles from './StorePacksList.module.scss'
 
+const packsListColumns = [
+  {key: 'title', locale: 'column-name', flex: 3},
+  {key: 'category', locale: 'column-category', flex: 2},
+  {key: 'age', locale: 'column-age', flex: 1},
+  {key: 'author', locale: 'column-author', flex: 2},
+  {key: 'updated_at', locale: 'column-updated', flex: 1, format: (v) => v ? new Date(v).toLocaleDateString() : ''},
+  {key: 'download_count', locale: 'column-downloads', flex: 1}
+]
+
 function StorePacksListContent({store, storeData}) {
   const
     {getLocale} = useLocale(),
@@ -67,7 +76,8 @@ function StorePacksListContent({store, storeData}) {
       onDownload={onDownload}
       onDownloadSelected={onDownloadSelected}
       additionalHeaderButtons={additionalHeaderButtons}
-      isLoading={storeData === null}/>
+      isLoading={storeData === null}
+      listColumns={packsListColumns}/>
     {
       storeData !== null && storeData.banner !== undefined &&
       <ButtonExternalLink href={storeData.banner.link}>

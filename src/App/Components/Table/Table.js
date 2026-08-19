@@ -48,15 +48,27 @@ function Table({
                  onDeleteSelected,
                  additionalHeaderButtons,
                  isLoading,
-                 emptyMessage
+                 emptyMessage,
+                 listColumns
                }) {
 
   const
     {getLocale} = useLocale(),
     [tableState, setTableState] = useState(null),
     [dataFiltered, setDataFiltered] = useState([]),
-    [listSort, setListSort] = useState({field: 'title', asc: true}),
+    [listSort, setListSort] = useState(null),
     viewMode = (tableState !== null && tableState.view === 'list') ? 'list' : 'grid',
+    columns = useMemo(
+      () => (Array.isArray(listColumns) && listColumns.length) ?
+        listColumns :
+        [
+          {key: 'cellTitle', locale: 'column-name', flex: 3},
+          {key: 'cellSubtitle', locale: 'column-details', flex: 2}
+        ],
+      [listColumns]
+    ),
+    sortField = listSort !== null ? listSort.field : columns[0].key,
+    sortAsc = listSort !== null ? listSort.asc : true,
     searchInput = useRef(),
 
     onSearch = useCallback(
@@ -179,7 +191,7 @@ function Table({
     onListSortBy = useCallback(
       (field) => setListSort((listSort) => ({
         field,
-        asc: listSort.field === field ? !listSort.asc : true
+        asc: (listSort !== null && listSort.field === field) ? !listSort.asc : true
       })),
       [setListSort]
     ),
@@ -201,11 +213,16 @@ function Table({
             },
             []
           ),
-          dir = listSort.asc ? 1 : -1,
-          key = listSort.field === 'title' ? 'cellTitle' : 'cellSubtitle'
-        return rows.sort((a, b) => dir * String(a[key] || '').localeCompare(String(b[key] || ''), undefined, {numeric: true}))
+          dir = sortAsc ? 1 : -1
+        return rows.sort((a, b) => {
+          const va = a[sortField], vb = b[sortField]
+          if (typeof va === 'number' && typeof vb === 'number') {
+            return dir * (va - vb)
+          }
+          return dir * String(va === undefined || va === null ? '' : va).localeCompare(String(vb === undefined || vb === null ? '' : vb), undefined, {numeric: true})
+        })
       },
-      [dataFiltered, viewMode, listSort]
+      [dataFiltered, viewMode, sortField, sortAsc]
     ),
 
     onListSelect = useCallback(
@@ -373,19 +390,20 @@ function Table({
           <ul className={styles.listView}>
             <li className={styles.listViewHeader}>
               <span className={styles.listViewHeaderImage}/>
-              <button className={styles.listViewHeaderCol}
-                      onClick={() => onListSortBy('title')}>
-                {getLocale('column-name') + (listSort.field === 'title' ? (listSort.asc ? ' \u25b4' : ' \u25be') : '')}
-              </button>
-              <button className={styles.listViewHeaderCol}
-                      onClick={() => onListSortBy('subtitle')}>
-                {getLocale('column-details') + (listSort.field === 'subtitle' ? (listSort.asc ? ' \u25b4' : ' \u25be') : '')}
-              </button>
+              {
+                columns.map((c) => <button key={'col-' + c.key}
+                                           className={styles.listViewHeaderCol}
+                                           style={{flex: (c.flex || 1) + ' 1 0'}}
+                                           onClick={() => onListSortBy(c.key)}>
+                  {getLocale(c.locale) + (sortField === c.key ? (sortAsc ? ' \u25b4' : ' \u25be') : '')}
+                </button>)
+              }
               <span className={styles.listViewHeaderActions}/>
             </li>
             {
               listRows.map((v, k) => <TableListRow key={'row-' + k}
                                                    data={v}
+                                                   columns={columns}
                                                    selected={isCellSelected(selectedData, v)}
                                                    onSelect={onListSelect}
                                                    onPlay={onPlay}

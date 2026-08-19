@@ -29,6 +29,7 @@ const
             music: musicPath,
             image: imagePath + '?t=' + Math.trunc(Date.now() / 10000),
             track: parseInt(track, 10),
+            size: fs.statSync(musicPath).size,
             title,
             album,
             artist
