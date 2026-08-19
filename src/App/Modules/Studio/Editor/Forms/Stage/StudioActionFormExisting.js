@@ -21,10 +21,14 @@ function StudioActionFormExisting({stageNode}) {
     onDrop = useCallback(
       (e) => {
         e.target.classList.remove(styles.actionLinkDragOver)
+        const stageId = e.dataTransfer.getData('stageId')
         updateStory((s) => {
+          if (s.nodes.stages[stageId] === undefined) {
+            return s
+          }
           return {
             ...s,
-            nodes: addStageOption(s.nodes, stageNode, e.dataTransfer.getData('stageId'))
+            nodes: addStageOption(s.nodes, stageNode, stageId)
           }
         })
       },

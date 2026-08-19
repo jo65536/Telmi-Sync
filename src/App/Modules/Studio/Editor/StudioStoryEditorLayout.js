@@ -146,29 +146,31 @@ function StudioStoryEditorLayout({closeEditor}) {
   useEffect(
     () => {
       const keyDownListener = (event) => {
-        const key = event.key.toLowerCase()
-        if (event.ctrlKey && key === 's') {
+        const
+          key = event.key.toLowerCase(),
+          modKey = event.ctrlKey || event.metaKey
+        if (modKey && key === 's') {
           blurFocus(event, () => setNextAction('onSave'))
         }
-        if (event.ctrlKey && key === 'e') {
+        if (modKey && key === 'e') {
           blurFocus(event, () => setNextAction('onZip'))
         }
-        if (event.ctrlKey && key === 'p') {
+        if (modKey && key === 'p') {
           blurFocus(event, () => setNextAction('onPlay'))
         }
-        if (event.ctrlKey && key === 'z') {
+        if (modKey && key === 'z') {
           blurFocus(event, onUndo)
         }
-        if (event.ctrlKey && key === 'y') {
+        if (modKey && key === 'y') {
           blurFocus(event, onRedo)
         }
-        if (event.ctrlKey && key === 'f') {
+        if (modKey && key === 'f') {
           blurFocus(event, onSearchStage)
         }
-        if (event.ctrlKey && key === 'i') {
+        if (modKey && key === 'i') {
           blurFocus(event, onEditItems)
         }
-        if (event.ctrlKey && key === 'a') {
+        if (modKey && key === 'a') {
           blurFocus(event, onEditAudios)
         }
       }

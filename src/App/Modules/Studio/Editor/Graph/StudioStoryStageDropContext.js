@@ -70,7 +70,8 @@ function StudioStoryStageDropContext({x, y, stageSrc, stageDst, setContextMenu})
                             e.stopPropagation()
                           }}>
       <ContextMenuItem onClick={onClickLink}>{getLocale('link')}</ContextMenuItem>
-      <ContextMenuItem onClick={onClickClone}>{getLocale('clone')}</ContextMenuItem>
+      {stageDst !== 'startStage' &&
+        <ContextMenuItem onClick={onClickClone}>{getLocale('clone')}</ContextMenuItem>}
       <ContextMenuItem onClick={onClickCancel}>{getLocale('cancel')}</ContextMenuItem>
     </ContextMenuContainer>
   </SVGHtml>
