@@ -28,6 +28,7 @@ function StoreAudioListContent({store, storeData}) {
       isSortedAsc,
       onInfo,
       onSelect,
+      onSelectAll,
       additionalHeaderButtons
     } = useStoreContent(store, storeData),
 
@@ -70,8 +71,9 @@ function StoreAudioListContent({store, storeData}) {
       onInfo={onInfo}
       selectedData={storiesSelected}
       onSelect={onSelect}
+      onSelectAll={onSelectAll}
       additionalHeaderButtons={additionalHeaderButtons}
-      isLoading={!stories.length}/>
+      isLoading={storeData === null}/>
     {
       storeData !== null &&
       <div className={styles.audioListContainer}>

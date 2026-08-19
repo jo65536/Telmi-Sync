@@ -66,6 +66,7 @@ function mainEventImport(mainWindow) {
   ipcMain.on(
     'import-cancel',
     async () => {
+      filesToProcess = []
       if (taskRunning !== null) {
         taskRunning.process.kill()
       }
