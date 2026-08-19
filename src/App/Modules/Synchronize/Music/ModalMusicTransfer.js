@@ -3,6 +3,7 @@ import ModalElectronTaskVisualizer from '../../../Components/Electron/Modal/Moda
 function ModalMusicTransfer ({musics, telmiOS, onClose}) {
   return <ModalElectronTaskVisualizer taskName="musics-transfer"
                                       dataSent={[telmiOS, musics]}
+                                      taskCancellable={true}
                                       onClose={onClose}/>
 }
 

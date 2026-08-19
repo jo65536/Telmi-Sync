@@ -63,6 +63,8 @@
 }
 
 .ip {
+  -webkit-user-select: text;
+  user-select: text;
   display: flex;
   justify-content: center;
   align-items: center;

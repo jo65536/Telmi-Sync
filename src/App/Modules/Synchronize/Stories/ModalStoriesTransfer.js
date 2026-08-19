@@ -3,6 +3,7 @@ import ModalElectronTaskVisualizer from '../../../Components/Electron/Modal/Moda
 function ModalStoriesTransfer ({stories, telmiOS, onClose}) {
   return <ModalElectronTaskVisualizer taskName="stories-transfer"
                                       dataSent={[telmiOS, stories]}
+                                      taskCancellable={true}
                                       onClose={onClose}/>
 }
 
