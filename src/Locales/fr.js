@@ -325,6 +325,8 @@ const fr = {
   'column-updated': 'Mise à jour',
   'column-downloads': 'Téléch.',
   'column-date': 'Date',
+  'stories-telmios': '{0} histoire(s) sur la Telmi',
+  'musics-telmios': '{0} musique(s) sur la Telmi',
   'import-dialog-medias': 'Histoires, packs et musiques',
   'import-dialog-all': 'Tous les fichiers',
   'spotify-show-not-found': 'Impossible de trouver le flux RSS public de ce podcast Spotify. S\'il est hébergé exclusivement chez Spotify, il ne peut pas être téléchargé — sinon, ajoutez directement l\'URL de son flux RSS.',

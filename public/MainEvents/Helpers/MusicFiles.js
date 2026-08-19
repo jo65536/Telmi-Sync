@@ -27,7 +27,7 @@ const
           acc.push({
             id: name,
             music: musicPath,
-            image: imagePath + '?t=' + Math.trunc(Date.now() / 10000),
+            image: imagePath + '?t=' + Math.trunc(fs.statSync(imagePath).mtimeMs),
             track: parseInt(track, 10),
             size: fs.statSync(musicPath).size,
             title,

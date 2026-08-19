@@ -11,11 +11,12 @@ function mainEventUpdate (mainWindow) {
     'check-update',
     async () => {
       try {
-        const json = await requestJson('https://api.github.com/repos/DantSu/Telmi-Sync/releases', {})
-        if (!json.length || !isNewerVersion(app.getVersion(), json[0].tag_name)) {
+        const json = await requestJson('https://api.github.com/repos/jo65536/Telmi-Sync/releases', {})
+        const latest = json.find((release) => !release.draft)
+        if (latest === undefined || !isNewerVersion(app.getVersion(), latest.tag_name)) {
           return
         }
-        mainWindow.webContents.send('check-update-data', 'https://telmi.fr/#download')
+        mainWindow.webContents.send('check-update-data', latest.html_url)
       } catch (ignored) {
         // best-effort check: stay silent offline
       }

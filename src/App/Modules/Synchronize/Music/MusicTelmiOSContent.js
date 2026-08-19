@@ -38,6 +38,7 @@ function MusicTelmiOSContent({selectedLocalMusics, setSelectedLocalMusics}) {
   return <TelmiOSLayout telmiOS={telmiOS}
                         onTransfer={selectedLocalMusics.length ? onTransfer : undefined}>
     <MusicTable id="music-telmios"
+                titleLocaleKey="musics-telmios"
                 className={styles.telmiOSTable}
                 musics={telmiOS.music}
                 onDelete={onDelete}
