@@ -4,6 +4,17 @@ import * as path from 'path'
 import { getProcessParams } from '../Helpers/ProcessParams.js'
 import { getMusicPath } from '../Helpers/AppPaths.js'
 
+function isFullyCopied (srcPath, dstPath) {
+  return fs.existsSync(dstPath) && fs.statSync(dstPath).size === fs.statSync(srcPath).size
+}
+
+function copyReplacing (srcPath, dstPath) {
+  if (fs.existsSync(dstPath)) {
+    fs.rmSync(dstPath)
+  }
+  fs.copyFileSync(srcPath, dstPath)
+}
+
 function main (dstMusicsPath, musicsIds) {
   let i = 0
   for (const musicId of musicsIds) {
@@ -21,20 +32,13 @@ function main (dstMusicsPath, musicsIds) {
       continue
     }
 
-    if (fs.existsSync(dstMusicPathMp3) && fs.existsSync(dstMusicPathMp3)) {
-      continue
+    if (!isFullyCopied(srcMusicPathMp3, dstMusicPathMp3)) {
+      copyReplacing(srcMusicPathMp3, dstMusicPathMp3)
     }
 
-    if (fs.existsSync(dstMusicPathMp3)) {
-      fs.rmSync(dstMusicPathMp3)
+    if (!isFullyCopied(srcMusicPathImg, dstMusicPathImg)) {
+      copyReplacing(srcMusicPathImg, dstMusicPathImg)
     }
-
-    if (fs.existsSync(dstMusicPathImg)) {
-      fs.rmSync(dstMusicPathImg)
-    }
-
-    fs.copyFileSync(srcMusicPathMp3, dstMusicPathMp3)
-    fs.copyFileSync(srcMusicPathImg, dstMusicPathImg)
   }
   process.stdout.write('success')
 }
@@ -46,4 +50,3 @@ if (_params_.length === 0) {
 } else {
   main(_params_.shift(), _params_)
 }
-
