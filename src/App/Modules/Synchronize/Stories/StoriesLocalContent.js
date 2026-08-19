@@ -1,5 +1,6 @@
 import {useCallback, useMemo} from 'react'
 import {useModal} from '../../../Components/Modal/ModalHooks.js'
+import {useLocale} from '../../../Components/Locale/LocaleHooks.js'
 import {useTelmiOS} from '../../../Components/TelmiOS/TelmiOSHooks.js'
 import {useLocalStories} from '../../../Components/LocalStories/LocalStoriesHooks.js'
 import {useRouter} from '../../../Router/RouterHooks.js'
@@ -14,6 +15,7 @@ const {ipcRenderer} = window.require('electron')
 
 function StoriesLocalContent({setSelectedStories, selectedStories}) {
   const
+    {getLocale} = useLocale(),
     localStories = useLocalStories(),
     {stories: telmiOSStories} = useTelmiOS(),
     {addModal, rmModal} = useModal(),
@@ -97,6 +99,7 @@ function StoriesLocalContent({setSelectedStories, selectedStories}) {
 
   return <StoriesTable id="stories-local"
                        stories={stories}
+                       emptyMessage={getLocale('stories-empty-hint')}
                        onOptimizeAudio={onOptimizeAudio}
                        onOptimizeAudioSelected={onOptimizeAudioSelected}
                        onStudio={onStudio}

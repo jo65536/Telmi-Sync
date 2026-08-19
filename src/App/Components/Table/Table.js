@@ -44,7 +44,8 @@ function Table({
                  onDelete,
                  onDeleteSelected,
                  additionalHeaderButtons,
-                 isLoading
+                 isLoading,
+                 emptyMessage
                }) {
 
   const
@@ -283,6 +284,14 @@ function Table({
     </div>
     <div className={styles.content}>
       <div className={styles.contentScroller}>
+        {
+          !isLoading && dataFiltered.length === 0 &&
+          <p className={styles.emptyState}>{
+            (tableState !== null && tableState.search !== '' && data.length > 0) ?
+              getLocale('table-empty-search', tableState.search) :
+              (emptyMessage || getLocale('table-empty'))
+          }</p>
+        }
         <ul className={styles.cells}>{
           dataFiltered.map((v, k) => {
             if (v.tableGroup !== undefined) {

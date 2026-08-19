@@ -2,12 +2,14 @@ import ModalLayout from '../../ModalLayout.js'
 import TaskProcessing from './TaskProcessing.js'
 import TaskWaiting from './TaskWaiting.js'
 import TaskError from './TaskError.js'
+import TaskSuccess from './TaskSuccess.js'
 
 import styles from './ModalTasksVisualizer.module.scss'
 
-function ModalTaskVisualizer ({processingTask, onCancelTask, waitingTasks, errorTasks, isClosable, onClose}) {
+function ModalTaskVisualizer ({processingTask, onCancelTask, waitingTasks, errorTasks, successMessage, isClosable, onClose}) {
   return <ModalLayout isClosable={isClosable} onClose={onClose}>
     <ul className={styles.container}>
+      {typeof successMessage === 'string' && successMessage !== '' && <TaskSuccess key={'success-task'} message={successMessage}/>}
       {processingTask && typeof processingTask === 'object' && <TaskProcessing key={'processing-task'} {...processingTask} onCancelTask={onCancelTask}/>}
       {Array.isArray(waitingTasks) && waitingTasks.map((v, k) => <TaskWaiting key={'waiting-tasks-' + k} task={v}/>)}
       {Array.isArray(errorTasks) && errorTasks.map((v, k) => <TaskError key={'error-tasks-' + k} task={v.task} message={v.message}/>)}

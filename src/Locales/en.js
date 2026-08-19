@@ -328,6 +328,13 @@ const en = {
 
   'server-launching': 'Launching server...',
   'server-launched': 'Server launched !',
+
+  'add-files': 'Add files',
+  'import-success': 'Import complete!',
+  'table-empty': 'Nothing here yet.',
+  'table-empty-search': 'No results for "{0}".',
+  'musics-empty-hint': 'Drop audio files here or click "Add files".',
+  'stories-empty-hint': 'Drop stories (.zip, .7z) here or click "Add files".',
 }
 
 export default en

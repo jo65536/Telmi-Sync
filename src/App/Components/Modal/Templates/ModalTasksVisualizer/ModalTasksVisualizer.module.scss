@@ -49,6 +49,17 @@
   text-align: left;
 }
 
+.taskTitleCentered {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.taskIconSuccess {
+  color: $green4 !important;
+}
+
 .taskIcon {
   flex: 0 0 65px;
   width: 65px;
