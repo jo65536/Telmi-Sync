@@ -11,8 +11,11 @@ const
   getFFmpegFilePath = () => {
     return getBinPath(getFFmpegFileName())
   },
-  spawnFFmpeg = (args) => {
+  spawnFFmpeg = (args, dstToRemove) => {
     return new Promise((resolve, reject) => {
+      if (dstToRemove !== undefined) {
+        rmFile(dstToRemove)
+      }
       const stream = spawn(getFFmpegFilePath(), ['-nostdin', '-y', ...args])
       let stderrTail = ''
       stream.stdout.resume()
@@ -54,7 +57,6 @@ const
     })
   },
   ffmpegAudioToMp3 = (srcFile, dstMp3, bitrate, maxVolume) => {
-    rmFile(dstMp3)
     return spawnFFmpeg([
       '-i', srcFile,
       '-map_metadata', '-1',
@@ -64,7 +66,7 @@ const
       '-ar', '44100',
       '-ac', '2',
       '-b:a', bitrate + 'k',
-      dstMp3])
+      dstMp3], dstMp3)
   },
   convertAudioToMp3 = (srcFile, dstMp3, forceConverting, forceVolume) => {
     return new Promise((resolve, reject) => {
@@ -126,7 +128,6 @@ const
     return aStr.map((s) => s.replace(/([^A-Za-z0-9 ]{1})/g, '\\$1')).join('\n')
   },
   convertImageToPng = (srcFile, dstPng, width, height, textToWrite, pageNumber) => {
-    rmFile(dstPng)
     const
       pageCommand = typeof pageNumber === 'string' ?
         ', drawtext=fontfile=\'' + path.join(getExtraResourcesPath(), 'fonts', 'exo2.ttf').replaceAll('\\', '\\\\').replaceAll(':', '\\:') +
@@ -138,15 +139,13 @@ const
         '\':text=\'' + processStringToFFmpeg(textToWrite) + '\':text_align=M+C:fontcolor=black:fontsize=32:' +
         'box=1:boxcolor=white@0.9:boxborderw=10|10:x=(w-text_w)/2:y=h-th-20' : ''
 
-    return spawnFFmpeg(['-i', srcFile, '-vf', 'scale=' + width + 'x' + height + ':flags=bilinear' + textCommand + pageCommand, dstPng])
+    return spawnFFmpeg(['-i', srcFile, '-vf', 'scale=' + width + 'x' + height + ':flags=bilinear' + textCommand + pageCommand, dstPng], dstPng)
   },
   audioExtractMetadata = (srcFile, dstTxt) => {
-    rmFile(dstTxt)
-    return spawnFFmpeg(['-i', srcFile, '-f', 'ffmetadata', dstTxt])
+    return spawnFFmpeg(['-i', srcFile, '-f', 'ffmetadata', dstTxt], dstTxt)
   },
   audioExtractPNG = (srcFile, dstPng) => {
-    rmFile(dstPng)
-    return spawnFFmpeg(['-i', srcFile, '-filter:v', 'scale=256x256', '-an', '-update', 'true', dstPng])
+    return spawnFFmpeg(['-i', srcFile, '-filter:v', 'scale=256x256', '-an', '-update', 'true', dstPng], dstPng)
   },
   audioGeneratePCM = (srcFile, dstPcm) => {
     return spawnFFmpeg(['-i', srcFile, '-ac', '1', '-ar', '1000', '-f', 'u8', '-c:a', 'pcm_u8', dstPcm])
@@ -183,8 +182,7 @@ const
     return spawnFFmpeg(['-i', srcFile, '-af', 'volume=enable=\'lte(t,' + startTime + ')\':volume=0, volume=enable=\'gte(t,' + endTime + ')\':volume=0', dstFile])
   },
   audioAmplify = (srcFile, dstMp3, decibel) => {
-    rmFile(dstMp3)
-    return spawnFFmpeg(['-i', srcFile, '-af', 'volume=' + decibel + 'dB', dstMp3])
+    return spawnFFmpeg(['-i', srcFile, '-af', 'volume=' + decibel + 'dB', dstMp3], dstMp3)
   }
 
 export {
