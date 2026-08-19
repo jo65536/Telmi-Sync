@@ -4,10 +4,23 @@ import {useLocale} from '../../../Components/Locale/LocaleHooks.js'
 import {isCellSelected} from '../../../Components/Table/TableHelpers.js'
 import {storiesClassification} from './StoriesClassification.js'
 import Table from '../../../Components/Table/Table.js'
+import TableHeaderIcon from '../../../Components/Table/TableHeaderIcon.js'
+import ButtonIconSort from '../../../Components/Buttons/Icons/ButtonIconSort.js'
 import ModalStoryFormUpdate from './ModalStoryFormUpdate.js'
 import ModalStoryDeleteConfirm from './ModalStoryDeleteConfirm.js'
 import ModalStoriesDeleteConfirm from './ModalStoriesDeleteConfirm.js'
 import ModalStoriesFormUpdate from './ModalStoriesFormUpdate.js'
+
+
+const sortTableData = (data, asc) => {
+  const
+    dir = asc ? 1 : -1,
+    label = (v) => String(v.tableGroup !== undefined ? v.tableGroup : v.cellTitle),
+    byTitle = (a, b) => dir * String(a.cellTitle).localeCompare(String(b.cellTitle), undefined, {numeric: true})
+  return data
+    .map((v) => v.tableGroup === undefined ? v : {...v, tableChildren: [...v.tableChildren].sort(byTitle)})
+    .sort((a, b) => dir * label(a).localeCompare(label(b), undefined, {numeric: true}))
+}
 
 const
   storiesIds = {},
@@ -39,6 +52,7 @@ function StoriesTable({
     {getLocale} = useLocale(),
     {addModal, rmModal} = useModal(),
     [isLoadingStories, setIsLoadingStories] = useState(false),
+    [isSortedAsc, setSortedAsc] = useState(true),
 
     {flatTableStories, tableStories} = useMemo(
       () => {
@@ -55,6 +69,13 @@ function StoriesTable({
       },
       [stories]
     ),
+
+    sortedTableStories = useMemo(
+      () => sortTableData(tableStories, isSortedAsc),
+      [tableStories, isSortedAsc]
+    ),
+
+    onToggleSort = useCallback(() => setSortedAsc((v) => !v), [setSortedAsc]),
 
     onSelect = useCallback(
       (story) => setSelectedStories((stories) => {
@@ -155,7 +176,7 @@ function StoriesTable({
                 titleRight={selectedStories.length ? getLocale('stories-selected', selectedStories.length) : undefined}
                 className={className}
                 id={id}
-                data={tableStories}
+                data={sortedTableStories}
                 selectedData={selectedStories}
                 onSelect={onSelect}
                 onSelectAll={onSelectAll}
@@ -168,7 +189,12 @@ function StoriesTable({
                 onEditSelected={onEditSelected !== undefined ? callbackOnEditSelected : undefined}
                 onDelete={callbackOnDelete}
                 onDeleteSelected={callbackOnDeleteSelected}
-                additionalHeaderButtons={additionalHeaderButtons}
+                additionalHeaderButtons={<>
+                  <TableHeaderIcon componentIcon={ButtonIconSort}
+                                   title={isSortedAsc ? 'sorted-asc' : 'sorted-desc'}
+                                   onClick={onToggleSort}/>
+                  {additionalHeaderButtons || null}
+                </>}
                 isLoading={isLoadingStories}
                 emptyMessage={emptyMessage}/>
 }

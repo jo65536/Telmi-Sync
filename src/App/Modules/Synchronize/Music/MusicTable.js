@@ -4,10 +4,23 @@ import {useLocale} from '../../../Components/Locale/LocaleHooks.js'
 import {musicClassification} from './MusicClassification.js'
 import {isCellSelected} from '../../../Components/Table/TableHelpers.js'
 import Table from '../../../Components/Table/Table.js'
+import TableHeaderIcon from '../../../Components/Table/TableHeaderIcon.js'
+import ButtonIconSort from '../../../Components/Buttons/Icons/ButtonIconSort.js'
 import ModalMusicFormUpdate from './ModalMusicFormUpdate.js'
 import ModalMusicDeleteConfirm from './ModalMusicDeleteConfirm.js'
 import ModalMusicsDeleteConfirm from './ModalMusicsDeleteConfirm.js'
 import ModalMusicsFormUpdate from './ModalMusicsFormUpdate.js'
+
+
+const sortTableData = (data, asc) => {
+  const
+    dir = asc ? 1 : -1,
+    label = (v) => String(v.tableGroup !== undefined ? v.tableGroup : v.cellTitle),
+    byTitle = (a, b) => dir * String(a.cellTitle).localeCompare(String(b.cellTitle), undefined, {numeric: true})
+  return data
+    .map((v) => v.tableGroup === undefined ? v : {...v, tableChildren: [...v.tableChildren].sort(byTitle)})
+    .sort((a, b) => dir * label(a).localeCompare(label(b), undefined, {numeric: true}))
+}
 
 const
   musicIds = {},
@@ -23,6 +36,7 @@ function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, o
     {getLocale} = useLocale(),
     {addModal, rmModal} = useModal(),
     [isLoadingMusics, setIsLoadingMusics] = useState(false),
+    [isSortedAsc, setSortedAsc] = useState(true),
 
     {flatTableMusics, tableMusics} = useMemo(
       () => {
@@ -41,6 +55,13 @@ function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, o
       },
       [musics]
     ),
+
+    sortedTableMusics = useMemo(
+      () => sortTableData(tableMusics, isSortedAsc),
+      [tableMusics, isSortedAsc]
+    ),
+
+    onToggleSort = useCallback(() => setSortedAsc((v) => !v), [setSortedAsc]),
 
     onSelect = useCallback(
       (music) => setSelectedMusics((musics) => {
@@ -144,7 +165,7 @@ function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, o
                 id={id}
                 titleLeft={getLocale('musics-local', flatTableMusics.length)}
                 titleRight={selectedMusics.length ? getLocale('musics-selected', selectedMusics.length) : undefined}
-                data={tableMusics}
+                data={sortedTableMusics}
                 selectedData={selectedMusics}
                 onSelect={onSelect}
                 onSelectAll={onSelectAll}
@@ -153,7 +174,10 @@ function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, o
                 onDelete={onCallbackDelete}
                 onDeleteSelected={onCallbackDeleteSelected}
                 isLoading={isLoadingMusics}
-                emptyMessage={emptyMessage}/>
+                emptyMessage={emptyMessage}
+                additionalHeaderButtons={<TableHeaderIcon componentIcon={ButtonIconSort}
+                                                          title={isSortedAsc ? 'sorted-asc' : 'sorted-desc'}
+                                                          onClick={onToggleSort}/>}/>
 }
 
 export default MusicTable

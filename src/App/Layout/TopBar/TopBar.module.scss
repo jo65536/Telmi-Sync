@@ -14,12 +14,13 @@
   top: 0;
   right: 0;
   padding-right: 15px;
-  background: $black20;
+  background: rgba(245, 245, 247, 0.92);
+  border-bottom: 1px solid $separator;
 }
 
 .navigation {
   flex: 1;
-  padding: 0 30px 0 30px;
+  padding: 0 30px 0 88px;
 }
 
 .logo {
@@ -48,9 +49,11 @@
   position: absolute;
   z-index: -1;
   bottom: 0;
-  left: 50%;
-  border: 6px solid transparent;
-  border-bottom-color: $orange;
+  left: 18%;
+  right: 18%;
+  height: 3px;
+  border-radius: 2px;
+  background: $orange;
 }
 
 .button {
@@ -64,7 +67,7 @@
 }
 
 .buttonDisabled, .buttonDisabled:hover {
-  color: $white;
+  color: $textPrimary;
   opacity: 0.3;
 }
 

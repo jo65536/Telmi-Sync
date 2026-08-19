@@ -16,20 +16,20 @@
 }
 
 *::-webkit-scrollbar-corner {
-  background: $black30;
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: $blueDark;
+  background-color: rgba(0, 0, 0, 0.25);
   border-radius: 4px;
-  border: 2px solid $black30;
+  border: 2px solid transparent;
   background-clip: content-box;
   min-width: 4px;
   min-height: 4px;
 }
 
 *::-webkit-scrollbar-track {
-  background-color: $black30;
+  background-color: transparent;
 }
 
 img {
@@ -42,15 +42,15 @@ html, body, body > div {
 }
 
 body {
-  background: radial-gradient(circle, $purple 0%, $purple2 100%);
+  background: $surfaceWindow;
 }
 
 body, button,
 input, textarea, select, option,
 input:disabled, textarea:disabled, select:disabled, option:disabled {
-  font-family: exo;
-  font-size: 16px;
-  color: $white70;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'exo', sans-serif;
+  font-size: 15px;
+  color: $textPrimary;
   -webkit-appearance: none;
   appearance: none;
 }
@@ -64,11 +64,12 @@ input:focus, textarea:focus, select:focus, option:focus {
 }
 
 input, textarea, select {
-  background: $white;
+  background: $surfacePanel;
 }
 
 input:disabled, textarea:disabled, select:disabled {
-  background: $white url("./Assets/Images/scratches-black.svg") repeat top left / 24px ;
+  background: $purple2;
+  color: $textSecondary;
 }
 
 button {

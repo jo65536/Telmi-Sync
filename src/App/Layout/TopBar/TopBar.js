@@ -7,9 +7,6 @@ import {routeStores} from '../../Modules/Stores/Routes.js'
 import {routeStudio} from '../../Modules/Studio/Routes.js'
 import {routeRSSFeed} from '../../Modules/RSSFeed/Routes.js'
 
-import ButtonIconXMark from '../../Components/Buttons/Icons/ButtonIconXMark.js'
-import ButtonIconWindow from '../../Components/Buttons/Icons/ButtonIconWindow.js'
-import ButtonIconWindowMinimize from '../../Components/Buttons/Icons/ButtonIconWindowMinimize.js'
 import ButtonIconTextArrowLeftRight from '../../Components/Buttons/IconsTexts/ButtonIconTextArrowLeftRight.js'
 import ButtonIconTextStore from '../../Components/Buttons/IconsTexts/ButtonIconTextStore.js'
 import ButtonIconTextRSSFeed from '../../Components/Buttons/IconsTexts/ButtonIconTextRSSFeed.js'
@@ -30,9 +27,6 @@ function TopBar({currentModule}) {
   const
     {getLocale} = useLocale(),
     {addModal, rmModal} = useModal(),
-    onMaximize = useCallback(() => ipcRenderer.send('window-maximize'), []),
-    onMinimize = useCallback(() => ipcRenderer.send('window-minimize'), []),
-    onClose = useCallback(() => ipcRenderer.send('close'), []),
     onParameters = useCallback(
       () => {
         addModal((key) => {
@@ -72,12 +66,6 @@ function TopBar({currentModule}) {
       <li><ButtonLangChooser/></li>
       <li><ButtonIconGear title={getLocale('telmi-sync-parameters', '')}
                           onClick={onParameters}/></li>
-      <li><ButtonIconWindowMinimize title={getLocale('minimize-window')}
-                                    onClick={onMinimize}/></li>
-      <li><ButtonIconWindow title={getLocale('maximize-window')}
-                            onClick={onMaximize}/></li>
-      <li><ButtonIconXMark title={getLocale('close-app')}
-                           onClick={onClose}/></li>
     </ul>
   </div>
 }
