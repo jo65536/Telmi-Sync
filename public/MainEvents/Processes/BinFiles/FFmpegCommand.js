@@ -11,13 +11,33 @@ const
   getFFmpegFilePath = () => {
     return getBinPath(getFFmpegFileName())
   },
+  spawnFFmpeg = (args) => {
+    return new Promise((resolve, reject) => {
+      const stream = spawn(getFFmpegFilePath(), ['-nostdin', '-y', ...args])
+      let stderrTail = ''
+      stream.stdout.resume()
+      stream.stderr.on('data', (d) => {
+        stderrTail = (stderrTail + d.toString()).slice(-2048)
+      })
+      stream.on('error', reject)
+      stream.on('close', (code) => {
+        if (code === 0) {
+          resolve()
+        } else {
+          const lastLine = stderrTail.split('\n').filter((v) => v.trim() !== '').pop()
+          reject(new Error('ffmpeg exited with code ' + code + (lastLine !== undefined ? ' : ' + lastLine : '')))
+        }
+      })
+    })
+  },
   getAudioInfos = (srcFile) => {
     return new Promise((resolve, reject) => {
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-af', 'volumedetect', '-vn', '-sn', '-dn', '-f', 'null', process.platform === 'win32' ? 'NUL' : '/dev/null'])
+      const stream = spawn(getFFmpegFilePath(), ['-nostdin', '-i', srcFile, '-af', 'volumedetect', '-vn', '-sn', '-dn', '-f', 'null', process.platform === 'win32' ? 'NUL' : '/dev/null'])
       let data = ''
       stream.stderr.on('data', (d) => {
         data += d.toString()
       })
+      stream.on('error', reject)
       stream.on('close', () => {
         const
           strRes = data.toString(),
@@ -34,26 +54,17 @@ const
     })
   },
   ffmpegAudioToMp3 = (srcFile, dstMp3, bitrate, maxVolume) => {
-    return new Promise((resolve, reject) => {
-      rmFile(dstMp3)
-      const stream = spawn(getFFmpegFilePath(), [
-        '-i', srcFile,
-        '-map_metadata', '-1',
-        '-map_chapters', '-1',
-        '-vn',
-        ...(maxVolume > 0 ? ['-af', 'volume=' + maxVolume + 'dB'] : []),
-        '-ar', '44100',
-        '-ac', '2',
-        '-b:a', bitrate + 'k',
-        dstMp3])
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    rmFile(dstMp3)
+    return spawnFFmpeg([
+      '-i', srcFile,
+      '-map_metadata', '-1',
+      '-map_chapters', '-1',
+      '-vn',
+      ...(maxVolume > 0 ? ['-af', 'volume=' + maxVolume + 'dB'] : []),
+      '-ar', '44100',
+      '-ac', '2',
+      '-b:a', bitrate + 'k',
+      dstMp3])
   },
   convertAudioToMp3 = (srcFile, dstMp3, forceConverting, forceVolume) => {
     return new Promise((resolve, reject) => {
@@ -71,8 +82,8 @@ const
             try {
               fs.copyFileSync(srcFile, dstMp3)
               resolve()
-            } catch (ignored) {
-              reject()
+            } catch (e) {
+              reject(e)
             }
           } else {
             ffmpegAudioToMp3(
@@ -82,13 +93,13 @@ const
               forceVolume ? maxVolume : 0
             )
               .then(() => resolve())
-              .catch(() => reject())
+              .catch(reject)
           }
         })
-        .catch((e) => {
+        .catch(() => {
           ffmpegAudioToMp3(srcFile, dstMp3, 192, 0)
             .then(() => resolve())
-            .catch(() => reject())
+            .catch(reject)
         })
     })
   },
@@ -115,67 +126,30 @@ const
     return aStr.map((s) => s.replace(/([^A-Za-z0-9 ]{1})/g, '\\$1')).join('\n')
   },
   convertImageToPng = (srcFile, dstPng, width, height, textToWrite, pageNumber) => {
-    return new Promise((resolve, reject) => {
-      rmFile(dstPng)
-      const
-        pageCommand = typeof pageNumber === 'string' ?
-          ', drawtext=fontfile=\'' + path.join(getExtraResourcesPath(), 'fonts', 'exo2.ttf').replaceAll('\\', '\\\\').replaceAll(':', '\\:') +
-          '\':text=\'' + processStringToFFmpeg(pageNumber) + '\':text_align=M+L:fontcolor=black:fontsize=32:' +
-          'box=1:boxcolor=white@0.9:boxborderw=10|10:x=15:y=15' : '',
+    rmFile(dstPng)
+    const
+      pageCommand = typeof pageNumber === 'string' ?
+        ', drawtext=fontfile=\'' + path.join(getExtraResourcesPath(), 'fonts', 'exo2.ttf').replaceAll('\\', '\\\\').replaceAll(':', '\\:') +
+        '\':text=\'' + processStringToFFmpeg(pageNumber) + '\':text_align=M+L:fontcolor=black:fontsize=32:' +
+        'box=1:boxcolor=white@0.9:boxborderw=10|10:x=15:y=15' : '',
 
-        textCommand = typeof textToWrite === 'string' ?
-          ', drawtext=fontfile=\'' + path.join(getExtraResourcesPath(), 'fonts', 'exo2.ttf').replaceAll('\\', '\\\\').replaceAll(':', '\\:') +
-          '\':text=\'' + processStringToFFmpeg(textToWrite) + '\':text_align=M+C:fontcolor=black:fontsize=32:' +
-          'box=1:boxcolor=white@0.9:boxborderw=10|10:x=(w-text_w)/2:y=h-th-20' : '',
+      textCommand = typeof textToWrite === 'string' ?
+        ', drawtext=fontfile=\'' + path.join(getExtraResourcesPath(), 'fonts', 'exo2.ttf').replaceAll('\\', '\\\\').replaceAll(':', '\\:') +
+        '\':text=\'' + processStringToFFmpeg(textToWrite) + '\':text_align=M+C:fontcolor=black:fontsize=32:' +
+        'box=1:boxcolor=white@0.9:boxborderw=10|10:x=(w-text_w)/2:y=h-th-20' : ''
 
-        stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-vf', 'scale=' + width + 'x' + height + ':flags=bilinear' + textCommand + pageCommand, dstPng])
-
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    return spawnFFmpeg(['-i', srcFile, '-vf', 'scale=' + width + 'x' + height + ':flags=bilinear' + textCommand + pageCommand, dstPng])
   },
   audioExtractMetadata = (srcFile, dstTxt) => {
-    return new Promise((resolve, reject) => {
-      rmFile(dstTxt)
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-f', 'ffmetadata', dstTxt])
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    rmFile(dstTxt)
+    return spawnFFmpeg(['-i', srcFile, '-f', 'ffmetadata', dstTxt])
   },
   audioExtractPNG = (srcFile, dstPng) => {
-    return new Promise((resolve, reject) => {
-      rmFile(dstPng)
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-filter:v', 'scale=256x256', '-an', '-update', 'true', dstPng])
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    rmFile(dstPng)
+    return spawnFFmpeg(['-i', srcFile, '-filter:v', 'scale=256x256', '-an', '-update', 'true', dstPng])
   },
   audioGeneratePCM = (srcFile, dstPcm) => {
-    return new Promise((resolve, reject) => {
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-ac', '1', '-ar', '1000', '-f', 'u8', '-c:a', 'pcm_u8', dstPcm])
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    return spawnFFmpeg(['-i', srcFile, '-ac', '1', '-ar', '1000', '-f', 'u8', '-c:a', 'pcm_u8', dstPcm])
   },
   checkTime = (t) => {
     if(/^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{2}$/.test(t)) {
@@ -197,69 +171,20 @@ const
     }
   },
   audioRemoveUnselectedTime = (srcFile, dstFile, startTime, endTime) => {
-    return new Promise((resolve, reject) => {
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-ss', startTime, '-to', endTime, '-c:a', 'copy', dstFile])
-      // stream.stderr.on('data', (data) => process.stdout.write('*' + data.toString() + '*0*1*'))
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    return spawnFFmpeg(['-i', srcFile, '-ss', startTime, '-to', endTime, '-c:a', 'copy', dstFile])
   },
   audioRemoveSelectedTime = (srcFile, dstFile, startTime, endTime) => {
-    return new Promise((resolve, reject) => {
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-filter_complex', '[0]atrim=duration=' + startTime + '[a];[0]atrim=start=' + endTime + '[b];[a][b]concat=n=2:v=0:a=1', dstFile])
-      // stream.stderr.on('data', (data) => process.stdout.write('*' + data.toString() + '*0*1*'))
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    return spawnFFmpeg(['-i', srcFile, '-filter_complex', '[0]atrim=duration=' + startTime + '[a];[0]atrim=start=' + endTime + '[b];[a][b]concat=n=2:v=0:a=1', dstFile])
   },
   audioMuteSelectedTime = (srcFile, dstFile, startTime, endTime) => {
-    return new Promise((resolve, reject) => {
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-af', 'volume=enable=\'between(t,' + startTime + ',' + endTime + ')\':volume=0', dstFile])
-      // stream.stderr.on('data', (data) => process.stdout.write('*' + data.toString() + '*0*1*'))
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    return spawnFFmpeg(['-i', srcFile, '-af', 'volume=enable=\'between(t,' + startTime + ',' + endTime + ')\':volume=0', dstFile])
   },
   audioMuteUnselectedTime = (srcFile, dstFile, startTime, endTime) => {
-    return new Promise((resolve, reject) => {
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-af', 'volume=enable=\'lte(t,' + startTime + ')\':volume=0, volume=enable=\'gte(t,' + endTime + ')\':volume=0', dstFile])
-      // stream.stderr.on('data', (data) => process.stdout.write('*' + data.toString() + '*0*1*'))
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    return spawnFFmpeg(['-i', srcFile, '-af', 'volume=enable=\'lte(t,' + startTime + ')\':volume=0, volume=enable=\'gte(t,' + endTime + ')\':volume=0', dstFile])
   },
   audioAmplify = (srcFile, dstMp3, decibel) => {
-    return new Promise((resolve, reject) => {
-      rmFile(dstMp3)
-      const stream = spawn(getFFmpegFilePath(), ['-i', srcFile, '-af', 'volume=' + decibel + 'dB', dstMp3])
-      stream.on('close', (code) => {
-        if (code === 0) {
-          resolve()
-        } else {
-          reject()
-        }
-      })
-    })
+    rmFile(dstMp3)
+    return spawnFFmpeg(['-i', srcFile, '-af', 'volume=' + decibel + 'dB', dstMp3])
   }
 
 export {
