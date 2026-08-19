@@ -2,6 +2,13 @@
 
 <p align="center"><img = src="https://dantsu.com/files/Telmi_MiyooPC.jpg" alt="Telmi OS - Telmi Sync" /></p>
 
+> [!WARNING]
+> **Experimental fork — not an official Telmi Sync release.**
+> This repository is a personal playground for testing fixes and UI experiments on top of
+> [DantSu/Telmi-Sync](https://github.com/DantSu/Telmi-Sync). Nothing here is endorsed by or
+> affiliated with the upstream project — for the official application, use the releases from
+> the upstream repository. Use anything from this fork at your own risk.
+
 # Telmi Sync - Synchronize your stories and music with Telmi OS
 
 This application is for installing Telmi OS and synchronized stories and music with Telmi OS.

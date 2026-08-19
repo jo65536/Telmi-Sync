@@ -148,7 +148,7 @@ function mainEventStores(mainWindow) {
                 channel = getFirstArrayElement(response.rss.channel)
 
               if (channel === undefined || channel.item === undefined || channel.item.length === 0) {
-                return mainWindow.webContents.send('store-remote-data', [])
+                return mainWindow.webContents.send('store-remote-data', {url: store.url})
               }
 
               const
@@ -156,12 +156,13 @@ function mainEventStores(mainWindow) {
                 imageUrl = getFirstArrayElement((getFirstArrayElement(channel.image) || {}).url) || getItuneImageHref(channel['itunes:image']) || getItuneImageHref(channel.item[0]['itunes:image'])
 
               if (imageUrl === undefined) {
-                return mainWindow.webContents.send('store-remote-data', [])
+                return mainWindow.webContents.send('store-remote-data', {url: store.url})
               }
 
               mainWindow.webContents.send(
                 'store-remote-data',
                 {
+                  url: store.url,
                   audioList: true,
                   store: {
                     title: getFirstArrayElement(channel.title) || 'Unknow title',
@@ -219,6 +220,7 @@ function mainEventStores(mainWindow) {
                 'store-remote-data',
                 {
                   ...response,
+                  url: store.url,
                   audioList: false,
                   data: response.data.map((v) => ({
                     title: v.title,
@@ -250,17 +252,18 @@ function mainEventStores(mainWindow) {
     }
   )
 
-  let downloadTaskRunning = null
-  const runDownload = (stories) => {
-    if (!stories.length) {
+  let downloadTaskRunning = null, downloadQueue = []
+  const runDownload = () => {
+    if (!downloadQueue.length) {
       downloadTaskRunning = null
+      mainWindow.webContents.send('store-download-waiting', [])
       mainWindow.webContents.send('store-download-task', '', '', 0, 0)
       return ipcMain.emit('local-stories-get')
     }
 
-    const story = stories.shift()
+    const story = downloadQueue.shift()
     mainWindow.webContents.send('store-download-task', story.title, 'initialize', 0, 1)
-    mainWindow.webContents.send('store-download-waiting', stories)
+    mainWindow.webContents.send('store-download-waiting', downloadQueue)
 
     downloadTaskRunning = runProcess(
       mainWindow,
@@ -274,13 +277,21 @@ function mainEventStores(mainWindow) {
       (error) => {
         mainWindow.webContents.send('store-download-error', story.title, error)
       },
-      () => runDownload(stories)
+      () => runDownload()
     )
   }
-  ipcMain.on('store-download', async (event, stories) => runDownload(stories))
+  ipcMain.on('store-download', async (event, stories) => {
+    downloadQueue = [...downloadQueue, ...stories]
+    if (downloadTaskRunning === null) {
+      runDownload()
+    } else {
+      mainWindow.webContents.send('store-download-waiting', downloadQueue)
+    }
+  })
   ipcMain.on(
     'store-download-cancel',
     async () => {
+      downloadQueue = []
       if (downloadTaskRunning !== null) {
         downloadTaskRunning.process.kill()
       }
