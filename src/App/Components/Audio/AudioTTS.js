@@ -33,7 +33,10 @@ function AudioTTS({title, text, onTTSEnded, className}) {
           const modal = <ModalElectronTaskVisualizer key={key}
                                                      taskName="piper-convert"
                                                      dataSent={[text]}
-                                                     onClose={() => rmModal(modal)}/>
+                                                     onClose={() => {
+                                                       rmModal(modal)
+                                                       setIsGenerate(false)
+                                                     }}/>
           return modal
         })
       },

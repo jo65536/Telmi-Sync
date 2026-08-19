@@ -51,7 +51,15 @@ function mainEventTelmiOS(mainWindow) {
 
   ipcMain.on(
     'telmios-diskusage',
-    async (event, telmiDevice) => mainWindow.webContents.send('telmios-diskusage-data', telmiDevice !== null ? checkDiskUsage(telmiDevice.drive) : null)
+    async (event, telmiDevice) => {
+      let usage = null
+      try {
+        usage = telmiDevice !== null ? checkDiskUsage(telmiDevice.drive) : null
+      } catch (e) {
+        console.log('telmios-diskusage : ' + e.toString())
+      }
+      mainWindow.webContents.send('telmios-diskusage-data', usage)
+    }
   )
 
   ipcMain.on('telmios-save-parameters', async (event, telmiDevice) => saveTelmiOSParameters(telmiDevice))

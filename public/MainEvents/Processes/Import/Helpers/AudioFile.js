@@ -32,7 +32,7 @@ const
 
         process.stdout.write('*converting-audio*' + (index++) + '*' + length + '*')
 
-        convertAudio(srcAudio, dstAudio, forceConverting, forceVolume).finally(callback)
+        convertAudio(srcAudio, dstAudio, forceConverting, forceVolume).finally(callback).catch(() => {})
         return true
       }
     ).finally(() => onEnd(index))

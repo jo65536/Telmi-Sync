@@ -110,7 +110,19 @@ function mainEventStudio(mainWindow) {
             imageTitle: fs.existsSync(pathImageTitle) ? pathImageTitle : undefined,
             imageCover: fs.existsSync(pathImageCover) ? pathImageCover : undefined,
           },
-          nodes = checkNodes(JSON.parse(fs.readFileSync(path.join(metadata.path, 'nodes.json')).toString('utf8')))
+          nodes = (() => {
+            try {
+              return checkNodes(JSON.parse(fs.readFileSync(path.join(metadata.path, 'nodes.json')).toString('utf8')))
+            } catch (e) {
+              console.log('studio-story-get : ' + e.toString())
+              return null
+            }
+          })()
+
+        if (nodes === null) {
+          return mainWindow.webContents.send('error-warning', {title: 'story-corrupted', message: metadataSrc.title || metadata.path})
+        }
+
         mainWindow.webContents.send('studio-story-data', {metadata, nodes, notes: checkNotes(metadata.path, nodes)})
       }
     }

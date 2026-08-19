@@ -14,6 +14,12 @@ const useStoreAudioBuilderDragAndDrop = (audioListKeys, setAudioList) => {
         if (dragItemKeys.length <= audioListKeys.length && isFlatArraysEquals(dragItemKeys, audioListKeys.slice(0, dragItemKeys.length))) {
           return
         }
+        // Dropping an item onto one of its own ancestors would rebuild the
+        // target node during removal and break the later reference lookup
+        // (crashing the whole builder). Treat it as a no-op.
+        if (audioListKeys.length < dragItemKeys.length && isFlatArraysEquals(audioListKeys, dragItemKeys.slice(0, audioListKeys.length))) {
+          return
+        }
         setAudioList((audioList) => {
           const
             parentDragItemKeys = dragItemKeys.slice(0, dragItemKeys.length - 1),

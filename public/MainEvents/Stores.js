@@ -181,7 +181,7 @@ function mainEventStores(mainWindow) {
                 copyright = getFirstArrayElement(channel.copyright) || '',
                 imageUrl = getFirstArrayElement((getFirstArrayElement(channel.image) || {}).url) || getItuneImageHref(channel['itunes:image']) || getItuneImageHref(channel.item[0]['itunes:image'])
 
-              if (imageUrl === undefined) {
+              if (!imageUrl) {
                 return mainWindow.webContents.send('store-remote-data', {url: store.url})
               }
 
@@ -209,9 +209,9 @@ function mainEventStores(mainWindow) {
                         return acc
                       }
 
-                      const downloadUrl = v.enclosure.find((encl) => encl.$.type.startsWith('audio/'))
+                      const downloadUrl = v.enclosure.find((encl) => encl.$ !== undefined && typeof encl.$.type === 'string' && encl.$.type.startsWith('audio/'))
 
-                      if (downloadUrl === undefined) {
+                      if (downloadUrl === undefined || downloadUrl.$.url === undefined) {
                         return acc
                       }
 
@@ -241,6 +241,8 @@ function mainEventStores(mainWindow) {
                   )
                 }
               )
+            } else if (!Array.isArray(response.data)) {
+              mainWindow.webContents.send('store-remote-data', {url: store.url})
             } else {
               mainWindow.webContents.send(
                 'store-remote-data',
@@ -273,6 +275,7 @@ function mainEventStores(mainWindow) {
           })
           .catch((e) => {
             console.log(e.toString())
+            mainWindow.webContents.send('store-remote-data', {url: store.url})
           })
       }
     }
