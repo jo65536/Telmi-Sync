@@ -328,6 +328,15 @@ const fr = {
 
   'server-launching': 'Démarrage du serveur...',
   'server-launched': 'Serveur démarré !',
+
+  'add-files': 'Ajouter des fichiers',
+  'import-dialog-medias': 'Histoires, packs et musiques',
+  'import-dialog-all': 'Tous les fichiers',
+  'import-success': 'Importation terminée !',
+  'table-empty': 'Rien ici pour le moment.',
+  'table-empty-search': 'Aucun résultat pour « {0} ».',
+  'musics-empty-hint': 'Glissez des fichiers audio ici ou cliquez sur « Ajouter des fichiers ».',
+  'stories-empty-hint': 'Glissez des histoires (.zip, .7z) ici ou cliquez sur « Ajouter des fichiers ».',
 }
 
 export default fr

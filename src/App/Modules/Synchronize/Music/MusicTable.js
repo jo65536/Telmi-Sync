@@ -18,7 +18,7 @@ const
     return musicIds[str]
   }
 
-function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, onEdit, onEditSelected, onDelete}) {
+function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, onEdit, onEditSelected, onDelete, emptyMessage}) {
   const
     {getLocale} = useLocale(),
     {addModal, rmModal} = useModal(),
@@ -152,7 +152,8 @@ function MusicTable({className, id, musics, selectedMusics, setSelectedMusics, o
                 onEditSelected={onEditSelected !== undefined ? onCallbackEditSelected : undefined}
                 onDelete={onCallbackDelete}
                 onDeleteSelected={onCallbackDeleteSelected}
-                isLoading={isLoadingMusics}/>
+                isLoading={isLoadingMusics}
+                emptyMessage={emptyMessage}/>
 }
 
 export default MusicTable

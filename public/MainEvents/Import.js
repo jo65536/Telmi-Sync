@@ -1,4 +1,4 @@
-import {ipcMain} from 'electron'
+import {dialog, ipcMain} from 'electron'
 import runProcess from './Processes/RunProcess.js'
 
 import * as path from 'path'
@@ -43,6 +43,23 @@ function mainEventImport(mainWindow) {
       } else {
         runImport()
       }
+    }
+  )
+
+  ipcMain.on(
+    'import-dialog',
+    async (event, mediaFilterName, allFilterName) => {
+      const {canceled, filePaths} = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openFile', 'multiSelections'],
+        filters: [
+          {name: mediaFilterName || 'Stories, packs and musics', extensions: ['zip', '7z', 'mp3', 'flac', 'aac', 'ogg', 'wav', 'mp4a', 'm4a', 'wma', 'webm']},
+          {name: allFilterName || 'All files', extensions: ['*']}
+        ]
+      })
+      if (canceled || !filePaths.length) {
+        return
+      }
+      mainWindow.webContents.send('import-files-selected', filePaths)
     }
   )
 

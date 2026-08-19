@@ -22,6 +22,7 @@ function StoriesTable({
                         stories,
                         className,
                         id,
+                        emptyMessage,
                         onPlay,
                         onAdd,
                         onStudio,
@@ -168,7 +169,8 @@ function StoriesTable({
                 onDelete={callbackOnDelete}
                 onDeleteSelected={callbackOnDeleteSelected}
                 additionalHeaderButtons={additionalHeaderButtons}
-                isLoading={isLoadingStories}/>
+                isLoading={isLoadingStories}
+                emptyMessage={emptyMessage}/>
 }
 
 

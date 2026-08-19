@@ -354,3 +354,21 @@
   font-weight: bold;
   color: $orange;
 }
+
+.emptyState {
+  padding: 45px 20px;
+  text-align: center;
+  font-style: italic;
+  font-size: 15px;
+  color: $white50;
+  animation: emptyStateFadeIn 0.2s ease 0.5s backwards;
+}
+
+@keyframes emptyStateFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

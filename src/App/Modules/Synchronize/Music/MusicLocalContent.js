@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react'
+import { useLocale } from '../../../Components/Locale/LocaleHooks.js'
 import { useLocalMusic } from '../../../Components/LocalMusic/LocalMusicHooks.js'
 import MusicTable from './MusicTable.js'
 import { useTelmiOS } from '../../../Components/TelmiOS/TelmiOSHooks.js'
@@ -7,6 +8,7 @@ const {ipcRenderer} = window.require('electron')
 
 function StoriesLocalContent ({setSelectedMusics, selectedMusics}) {
   const
+    {getLocale} = useLocale(),
     localMusics = useLocalMusic(),
     {music: telmiOSmusics} = useTelmiOS(),
 
@@ -24,6 +26,7 @@ function StoriesLocalContent ({setSelectedMusics, selectedMusics}) {
 
   return <MusicTable id="music-local"
                      musics={musics}
+                     emptyMessage={getLocale('musics-empty-hint')}
                      onEdit={onEdit}
                      onEditSelected={onEditSelected}
                      onDelete={onDelete}
