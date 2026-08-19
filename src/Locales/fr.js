@@ -329,6 +329,8 @@ const fr = {
   'server-launched': 'Serveur démarré !',
 
   'add-files': 'Ajouter des fichiers',
+  'import-dialog-medias': 'Histoires, packs et musiques',
+  'import-dialog-all': 'Tous les fichiers',
   'import-success': 'Importation terminée !',
   'table-empty': 'Rien ici pour le moment.',
   'table-empty-search': 'Aucun résultat pour « {0} ».',

@@ -25,7 +25,7 @@ const {ipcRenderer} = window.require('electron')
 function SynchronizeHome () {
   const
     {getLocale} = useLocale(),
-    onAddFiles = useCallback(() => ipcRenderer.send('import-dialog'), [])
+    onAddFiles = useCallback(() => ipcRenderer.send('import-dialog', getLocale('import-dialog-medias'), getLocale('import-dialog-all')), [getLocale])
 
   return <Import>
     <TopBar currentModule="Synchronize"/>

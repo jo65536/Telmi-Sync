@@ -44,12 +44,11 @@ function ModalImport ({files, onClose}) {
 
   useEffect(() => {
     if (processingFile === null && !waitingFiles.length) {
+      setIsClosable(true)
       if (!errorFiles.length) {
         setIsSuccess(true)
         const timeout = setTimeout(onClose, 1800)
         return () => clearTimeout(timeout)
-      } else {
-        setIsClosable(true)
       }
     } else {
       setIsSuccess(false)

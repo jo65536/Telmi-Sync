@@ -285,7 +285,7 @@ function Table({
     <div className={styles.content}>
       <div className={styles.contentScroller}>
         {
-          !isLoading && dataFiltered.length === 0 &&
+          !isLoading && dataFiltered.length === 0 && (tableState !== null || data.length === 0) &&
           <p className={styles.emptyState}>{
             (tableState !== null && tableState.search !== '' && data.length > 0) ?
               getLocale('table-empty-search', tableState.search) :

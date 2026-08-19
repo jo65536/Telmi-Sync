@@ -48,19 +48,18 @@ function mainEventImport(mainWindow) {
 
   ipcMain.on(
     'import-dialog',
-    async () => {
+    async (event, mediaFilterName, allFilterName) => {
       const {canceled, filePaths} = await dialog.showOpenDialog(mainWindow, {
         properties: ['openFile', 'multiSelections'],
         filters: [
-          {name: 'Stories, packs and musics', extensions: ['zip', '7z', 'mp3', 'flac', 'aac', 'ogg', 'wav', 'mp4a', 'm4a', 'wma', 'webm']},
-          {name: 'All files', extensions: ['*']}
+          {name: mediaFilterName || 'Stories, packs and musics', extensions: ['zip', '7z', 'mp3', 'flac', 'aac', 'ogg', 'wav', 'mp4a', 'm4a', 'wma', 'webm']},
+          {name: allFilterName || 'All files', extensions: ['*']}
         ]
       })
       if (canceled || !filePaths.length) {
         return
       }
       mainWindow.webContents.send('import-files-selected', filePaths)
-      ipcMain.emit('import', {}, filePaths)
     }
   )
 

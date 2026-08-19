@@ -37,8 +37,8 @@ function Import ({children}) {
 
   useElectronListener(
     'import-files-selected',
-    (filesPath) => openImportModal(filesPath),
-    [openImportModal]
+    (filesPath) => onFilesDropped(filesPath),
+    [onFilesDropped]
   )
 
   return <DropFiles onFilesDropped={onFilesDropped}>{children}</DropFiles>

@@ -330,6 +330,8 @@ const en = {
   'server-launched': 'Server launched !',
 
   'add-files': 'Add files',
+  'import-dialog-medias': 'Stories, packs and musics',
+  'import-dialog-all': 'All files',
   'import-success': 'Import complete!',
   'table-empty': 'Nothing here yet.',
   'table-empty-search': 'No results for "{0}".',
