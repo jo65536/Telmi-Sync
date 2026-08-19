@@ -1,5 +1,15 @@
 @use "src/App/variables" as *;
 
+.importBar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 15px;
+  padding-bottom: 5px;
+}
+
 .tooltip {
   font-size: 14px;
   font-style: italic;

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useModal } from '../../Components/Modal/ModalHooks.js'
+import { useElectronListener } from '../../Components/Electron/Hooks/UseElectronEvent.js'
 import DropFiles from '../../Components/DropFiles/DropFiles.js'
 import ModalImport from './ModalImport.js'
 
@@ -8,25 +9,37 @@ function Import ({children}) {
   const
     [isProcessing, setIsProcessing] = useState(false),
     {addModal, rmModal} = useModal(),
+    openImportModal = useCallback(
+      (filesPath) => {
+        if (isProcessing) {
+          return
+        }
+        setIsProcessing(true)
+        addModal(key => {
+          const modal = <ModalImport key={key}
+                                     files={filesPath}
+                                     onClose={() => {
+                                            setIsProcessing(false)
+                                            rmModal(modal)
+                                          }}/>
+          return modal
+        })
+      },
+      [addModal, rmModal, isProcessing, setIsProcessing]
+    ),
     onFilesDropped = useCallback(
       (filesPath) => {
         ipcRenderer.send('import', filesPath)
-
-        if (!isProcessing) {
-          setIsProcessing(true)
-          addModal(key => {
-            const modal = <ModalImport key={key}
-                                       files={filesPath}
-                                       onClose={() => {
-                                              setIsProcessing(false)
-                                              rmModal(modal)
-                                            }}/>
-            return modal
-          })
-        }
+        openImportModal(filesPath)
       },
-      [addModal, rmModal, isProcessing, setIsProcessing]
+      [openImportModal]
     )
+
+  useElectronListener(
+    'import-files-selected',
+    (filesPath) => openImportModal(filesPath),
+    [openImportModal]
+  )
 
   return <DropFiles onFilesDropped={onFilesDropped}>{children}</DropFiles>
 }
