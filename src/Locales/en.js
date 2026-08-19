@@ -312,6 +312,10 @@ const en = {
   'inventory-reset': 'Reset values of inventory items',
 
   'add-files': 'Add files',
+  'view-list': 'View as list',
+  'view-grid': 'View as grid',
+  'column-name': 'Name',
+  'column-details': 'Details',
   'import-dialog-medias': 'Stories, packs and musics',
   'import-dialog-all': 'All files',
   'import-success': 'Import complete!',

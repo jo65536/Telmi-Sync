@@ -146,9 +146,8 @@
 }
 
 .cell:hover {
-  color: $white;
-  background: $blueDark;
-  border-color: $blue;
+  background: $white10;
+  border-color: $white30;
 }
 
 .cell:before,
@@ -339,7 +338,7 @@
 }
 
 .list:hover {
-  color: $white;
+  color: $accent;
 }
 
 .listSelected, .listSelected:hover {
@@ -353,6 +352,117 @@
   font-family: icons;
   font-weight: bold;
   color: $orange;
+}
+
+.listView {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 10px 10px 10px;
+}
+
+.listViewHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  border-bottom: 1px solid $white20;
+}
+
+.listViewHeaderImage {
+  flex: 0 0 32px;
+}
+
+.listViewHeaderCol {
+  flex: 1 1 50%;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: $white60;
+  padding: 4px 0;
+}
+
+.listViewHeaderCol:hover {
+  color: $accent;
+}
+
+.listViewHeaderActions {
+  flex: 0 0 120px;
+}
+
+.listRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.listRow:nth-child(odd) {
+  background: $white5;
+}
+
+.listRow:hover {
+  background: $white10;
+}
+
+.listRowSelected, .listRowSelected:hover, .listRowSelected:nth-child(odd) {
+  background: $orange;
+  color: $white;
+}
+
+.listRowSelected .listRowSubtitle {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.listRowImage {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.listRowTitle {
+  flex: 1 1 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+}
+
+.listRowSubtitle {
+  flex: 1 1 50%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+  color: $white60;
+}
+
+.listRowActions {
+  flex: 0 0 auto;
+  min-width: 120px;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.listRow:hover .listRowActions, .listRowSelected .listRowActions {
+  opacity: 1;
+}
+
+.listRowActionButton {
+  padding: 3px 6px;
+  font-size: 15px;
+}
+
+.listRowDisabled {
+  opacity: 0.35;
 }
 
 .emptyState {

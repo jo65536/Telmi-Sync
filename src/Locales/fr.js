@@ -310,6 +310,10 @@ const fr = {
   'inventory-reset': 'Réinitialiser les valeurs de l\'inventaire',
 
   'add-files': 'Ajouter des fichiers',
+  'view-list': 'Afficher en liste',
+  'view-grid': 'Afficher en grille',
+  'column-name': 'Nom',
+  'column-details': 'Détails',
   'import-dialog-medias': 'Histoires, packs et musiques',
   'import-dialog-all': 'Tous les fichiers',
   'import-success': 'Importation terminée !',
