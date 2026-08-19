@@ -21,6 +21,7 @@ function StorePacksListContent({store, storeData}) {
       isSortedAsc,
       onInfo,
       onSelect,
+      onSelectAll,
       additionalHeaderButtons
     } = useStoreContent(store, storeData),
 
@@ -62,12 +63,13 @@ function StorePacksListContent({store, storeData}) {
       onInfo={onInfo}
       selectedData={storiesSelected}
       onSelect={onSelect}
+      onSelectAll={onSelectAll}
       onDownload={onDownload}
       onDownloadSelected={onDownloadSelected}
       additionalHeaderButtons={additionalHeaderButtons}
-      isLoading={!stories.length}/>
+      isLoading={storeData === null}/>
     {
-      storeData !== null &&
+      storeData !== null && storeData.banner !== undefined &&
       <ButtonExternalLink href={storeData.banner.link}>
         <div className={styles.bannerContainer} style={{background: storeData.banner.background}}>
           <div className={styles.bannerInnerContainer}>

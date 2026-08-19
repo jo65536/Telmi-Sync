@@ -44,16 +44,31 @@ const
       onSelect = useCallback(
         (story) => setStoriesSelected((stories) => {
           if (Array.isArray(story)) {
+            const selectable = story.filter((s) => !s.cellDisabled)
             return [
-              ...stories.reduce((acc, s) => isCellSelected(story, s) ? acc : [...acc, s], []),
-              ...story
+              ...stories.reduce((acc, s) => isCellSelected(selectable, s) ? acc : [...acc, s], []),
+              ...selectable
             ]
           }
+          if (story.cellDisabled) {
+            return stories
+          }
           if (isCellSelected(stories, story)) {
-            return stories.filter((v) => v !== story)
+            return stories.filter((v) => v.cellId !== story.cellId)
           } else {
             return [...stories, story]
           }
+        }),
+        [setStoriesSelected]
+      ),
+
+      onSelectAll = useCallback(
+        (stories) => setStoriesSelected((current) => {
+          const selectable = stories.filter((s) => !s.cellDisabled)
+          if (selectable.length && selectable.every((s) => isCellSelected(current, s))) {
+            return current.filter((s) => !isCellSelected(selectable, s))
+          }
+          return [...current, ...selectable.filter((s) => !isCellSelected(current, s))]
         }),
         [setStoriesSelected]
       ),
@@ -76,7 +91,8 @@ const
 
     useEffect(
       () => {
-        if (storeData === null) {
+        if (storeData === null || !Array.isArray(storeData.data)) {
+          setStories([])
           return
         }
         if (store.isSortedByName === undefined) {
@@ -109,7 +125,7 @@ const
                   store: storeData.store !== undefined ? storeData.store.title : store.title,
                   isUpdated,
                   isPerfect,
-                  cellId: storeStoryGetId(title),
+                  cellId: storeStoryGetId((s.uuid || '') + '|' + (s.download || '') + '|' + title),
                   cellTitle: title,
                   cellSubtitle: s.category,
                   cellLabelIcon: isNew ? '\uf005' : (isUpdated ? '\uf274' : (isPerfect ? '\uf559' : undefined)),
@@ -134,6 +150,7 @@ const
       setSortedAsc,
       onInfo,
       onSelect,
+      onSelectAll,
       additionalHeaderButtons
     }
   }
