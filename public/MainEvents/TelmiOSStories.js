@@ -14,7 +14,12 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
         mainWindow.webContents.send('telmios-stories-data',[])
         return
       }
-      const list = readStories(getTelmiOSStoriesPath(telmiDevice.drive))
+      let list = {stories: [], error: []}
+      try {
+        list = readStories(getTelmiOSStoriesPath(telmiDevice.drive))
+      } catch (e) {
+        console.log('telmios-stories-get : ' + e.toString())
+      }
       list.error.forEach((d) => mainWindow.webContents.send('error-warning', {title: 'story-corrupted', message: 'External drive : ' + telmiDevice.drive + ' | Story : ' + d}))
       mainWindow.webContents.send('telmios-stories-data', list.stories)
     }

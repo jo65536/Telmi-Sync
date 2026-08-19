@@ -8,10 +8,13 @@ function mainEventTelmiOSMusicReader(mainWindow) {
   ipcMain.on(
     'telmios-musics-get',
     async (event, telmiDevice) => {
-      mainWindow.webContents.send(
-        'telmios-musics-data',
-        telmiDevice !== null ? readMusic(getTelmiOSMusicPath(telmiDevice.drive)) : []
-      )
+      let musics = []
+      try {
+        musics = telmiDevice !== null ? readMusic(getTelmiOSMusicPath(telmiDevice.drive)) : []
+      } catch (e) {
+        console.log('telmios-musics-get : ' + e.toString())
+      }
+      mainWindow.webContents.send('telmios-musics-data', musics)
     }
   )
 
@@ -58,7 +61,9 @@ function mainEventTelmiOSMusicReader(mainWindow) {
       (message, current, total) => {
         mainWindow.webContents.send('musics-transfer-task', 'musics-transferring', message, current, total)
       },
-      () => {},
+      (error) => {
+        mainWindow.webContents.send('musics-transfer-error', 'musics-transferring', error)
+      },
       onFinished
     )
   })

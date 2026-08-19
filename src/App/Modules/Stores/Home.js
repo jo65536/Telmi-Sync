@@ -10,7 +10,7 @@ import StoreContent from './Store/StoreContent.js'
 import styles from './Stores.module.scss'
 import StoreAudioBuilderProvider from './Store/AudioList/Provider/StoreAudioBuilderProvider.js'
 
-const plusTab = {tab: TabPlus, content: null}
+const plusTab = {id: '__plus__', tab: TabPlus, content: null}
 
 function StoresHome() {
   const [tabs, setTabs] = useState([])
@@ -22,6 +22,7 @@ function StoresHome() {
     (stores) => setTabs([
       ...stores.map(
         (store) => ({
+          id: store.url,
           tab: (props) => <TabStore {...props} store={store}/>,
           content: () => <StoreContent store={store}/>
         })

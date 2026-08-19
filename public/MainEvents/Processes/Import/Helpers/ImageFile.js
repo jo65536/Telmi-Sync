@@ -41,7 +41,7 @@ const
 
         process.stdout.write('*converting-images*' + (index++) + '*' + length + '*')
 
-        convertStoryImage(srcImage, dstImage, textToWrite, pageNumber).finally(callback)
+        convertStoryImage(srcImage, dstImage, textToWrite, pageNumber).finally(callback).catch(() => {})
         return true
       }
     ).finally(() => onEnd(index))
@@ -64,7 +64,7 @@ const
 
         process.stdout.write('*converting-images*' + (index++) + '*' + length + '*')
 
-        convertInventoryImage(srcImage, dstImage).finally(callback)
+        convertInventoryImage(srcImage, dstImage).finally(callback).catch(() => {})
         return true
       },
     ).finally(() => onEnd(index))
