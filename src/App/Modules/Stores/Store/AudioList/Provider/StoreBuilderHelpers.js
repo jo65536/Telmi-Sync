@@ -62,9 +62,11 @@ const
     if (!audioListKeys.length) {
       return item
     }
-    const audioListKey = audioListKeys.shift()
-    audioList.audio[audioListKey] = updateAudioItem(audioList.audio[audioListKey], audioListKeys, item)
-    return {...audioList}
+    const
+      audioListKey = audioListKeys.shift(),
+      audio = [...audioList.audio]
+    audio[audioListKey] = updateAudioItem(audio[audioListKey], audioListKeys, item)
+    return {...audioList, audio}
   },
 
   updateAudioItemField = (audioList, audioListKeys, field, value) => {
@@ -74,9 +76,11 @@ const
         [field]: value
       }
     }
-    const audioListKey = audioListKeys.shift()
-    audioList.audio[audioListKey] = updateAudioItemField(audioList.audio[audioListKey], audioListKeys, field, value)
-    return {...audioList}
+    const
+      audioListKey = audioListKeys.shift(),
+      audio = [...audioList.audio]
+    audio[audioListKey] = updateAudioItemField(audio[audioListKey], audioListKeys, field, value)
+    return {...audioList, audio}
   },
 
   addAudioItems = (audioList, audioListKeys, items) => {
@@ -86,9 +90,11 @@ const
         audio: [...audioList.audio, ...items]
       }
     }
-    const audioListKey = audioListKeys.shift()
-    audioList.audio[audioListKey] = addAudioItems(audioList.audio[audioListKey], audioListKeys, items)
-    return {...audioList}
+    const
+      audioListKey = audioListKeys.shift(),
+      audio = [...audioList.audio]
+    audio[audioListKey] = addAudioItems(audio[audioListKey], audioListKeys, items)
+    return {...audioList, audio}
   },
 
   insertAudioItems = (audioList, audioListKeys, index, items) => {
@@ -102,9 +108,11 @@ const
         ]
       }
     }
-    const audioListKey = audioListKeys.shift()
-    audioList.audio[audioListKey] = insertAudioItems(audioList.audio[audioListKey], audioListKeys, index, items)
-    return {...audioList}
+    const
+      audioListKey = audioListKeys.shift(),
+      audio = [...audioList.audio]
+    audio[audioListKey] = insertAudioItems(audio[audioListKey], audioListKeys, index, items)
+    return {...audioList, audio}
   },
 
   removeAudioItem = (audioList, audioListKeys) => {
@@ -114,9 +122,11 @@ const
         audio: [...audioList.audio.slice(0, audioListKeys[0]), ...audioList.audio.slice(audioListKeys[0] + 1)]
       }
     }
-    const audioListKey = audioListKeys.shift()
-    audioList.audio[audioListKey] = removeAudioItem(audioList.audio[audioListKey], audioListKeys)
-    return {...audioList}
+    const
+      audioListKey = audioListKeys.shift(),
+      audio = [...audioList.audio]
+    audio[audioListKey] = removeAudioItem(audio[audioListKey], audioListKeys)
+    return {...audioList, audio}
   }
 
 export {

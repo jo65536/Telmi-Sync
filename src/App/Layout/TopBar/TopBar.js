@@ -21,7 +21,6 @@ import LogoTelmi from '../../Assets/Images/logo-telmi.svg'
 
 import styles from './TopBar.module.scss'
 
-const {ipcRenderer} = window.require('electron')
 
 function TopBar({currentModule}) {
   const
