@@ -1,4 +1,5 @@
 import {ipcMain} from 'electron'
+import {rmDirectory} from './Helpers/Files.js'
 import {getTelmiOSStoriesPath} from './Helpers/TelmiOSPath.js'
 import {deleteStories} from './Helpers/StoriesProcess.js'
 import {readStories} from './Helpers/Stories.js'
@@ -34,7 +35,7 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       }
     }
   )
-  let storiesTransferTask = null, storiesTransferCancelled = false
+  let storiesTransferTask = null, storiesTransferCancelled = false, storyTransferring = null
 
   ipcMain.on('stories-transfer-cancel', async () => {
     storiesTransferCancelled = true
@@ -45,13 +46,19 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
 
   const startTransfer = (telmiDevice, dstPath, stories) => {
     if (storiesTransferCancelled || !stories.length) {
+      if (storiesTransferCancelled && storyTransferring !== null) {
+        rmDirectory(path.join(dstPath, path.basename(storyTransferring.path)))
+      }
+      storyTransferring = null
       storiesTransferTask = null
+      mainWindow.webContents.send('stories-transfer-waiting', [])
       mainWindow.webContents.send('stories-transfer-task', '', '', 0, 0)
       ipcMain.emit('telmios-stories-get', {}, telmiDevice)
       return ipcMain.emit('telmios-diskusage', {}, telmiDevice)
     }
 
     const story = stories.shift()
+    storyTransferring = story
     mainWindow.webContents.send('stories-transfer-task', story.title, 'initialize', 0, 1)
     mainWindow.webContents.send('stories-transfer-waiting', stories)
 
@@ -59,7 +66,9 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       mainWindow,
       path.join('Stories', 'StoryTransfer.js'),
       [dstPath, story.path],
-      () => {},
+      () => {
+        storyTransferring = null
+      },
       (message, current, total) => {
         mainWindow.webContents.send('stories-transfer-task', story.title, message, current, total)
       },

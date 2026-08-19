@@ -6,9 +6,12 @@ import { printf } from '../../Helpers/String.js'
 const
   LANG_STORAGE_KEY = 'telmi-sync-lang',
   getDefaultLang = () => {
-    const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY)
-    if (storedLang !== null && locales[storedLang] !== undefined) {
-      return storedLang
+    try {
+      const storedLang = window.localStorage.getItem(LANG_STORAGE_KEY)
+      if (storedLang !== null && locales[storedLang] !== undefined) {
+        return storedLang
+      }
+    } catch (ignored) {
     }
     const osLang = (window.navigator.language || 'fr').substring(0, 2).toLowerCase()
     return locales[osLang] !== undefined ? osLang : 'en'
@@ -22,7 +25,10 @@ function LocaleProvider ({children}) {
         if (locales[newLang] === undefined) {
           return
         }
-        window.localStorage.setItem(LANG_STORAGE_KEY, newLang)
+        try {
+          window.localStorage.setItem(LANG_STORAGE_KEY, newLang)
+        } catch (ignored) {
+        }
         setLangState(newLang)
       },
       [setLangState]
