@@ -34,8 +34,18 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       }
     }
   )
+  let storiesTransferTask = null, storiesTransferCancelled = false
+
+  ipcMain.on('stories-transfer-cancel', async () => {
+    storiesTransferCancelled = true
+    if (storiesTransferTask !== null) {
+      storiesTransferTask.process.kill()
+    }
+  })
+
   const startTransfer = (telmiDevice, dstPath, stories) => {
-    if (!stories.length) {
+    if (storiesTransferCancelled || !stories.length) {
+      storiesTransferTask = null
       mainWindow.webContents.send('stories-transfer-task', '', '', 0, 0)
       ipcMain.emit('telmios-stories-get', {}, telmiDevice)
       return ipcMain.emit('telmios-diskusage', {}, telmiDevice)
@@ -45,7 +55,7 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
     mainWindow.webContents.send('stories-transfer-task', story.title, 'initialize', 0, 1)
     mainWindow.webContents.send('stories-transfer-waiting', stories)
 
-    runProcess(
+    storiesTransferTask = runProcess(
       mainWindow,
       path.join('Stories', 'StoryTransfer.js'),
       [dstPath, story.path],
@@ -59,7 +69,10 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       () => startTransfer(telmiDevice, dstPath, stories)
     )
   }
-  ipcMain.on('stories-transfer', async (event, telmiDevice, stories) => startTransfer(telmiDevice, getTelmiOSStoriesPath(telmiDevice.drive), stories))
+  ipcMain.on('stories-transfer', async (event, telmiDevice, stories) => {
+    storiesTransferCancelled = false
+    startTransfer(telmiDevice, getTelmiOSStoriesPath(telmiDevice.drive), stories)
+  })
 }
 
 export default mainEventTelmiOSStoriesReader
