@@ -10,3 +10,83 @@
 .inputMaxWidth {
   max-width: 500px;
 }
+.searchRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 360px;
+  padding: 8px 12px;
+  font-size: 15px;
+  border: 1px solid $separator;
+  border-radius: 8px;
+  background: $surfacePanel;
+  color: $textPrimary;
+}
+
+.searchInput:focus {
+  border-color: $accent;
+}
+
+.searchEmpty {
+  padding: 25px 10px;
+  text-align: center;
+  font-style: italic;
+  color: $white50;
+}
+
+.searchResults {
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.searchResult {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.searchResult:hover {
+  background: $white10;
+}
+
+.searchResultImage {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: $white10;
+}
+
+.searchResultText {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.searchResultTitle {
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchResultAuthor {
+  font-size: 13px;
+  color: $white60;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

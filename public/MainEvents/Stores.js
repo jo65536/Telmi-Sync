@@ -1,5 +1,6 @@
 import {ipcMain} from 'electron'
 import {isSpotifyShowUrl, resolveSpotifyShowToRss} from './Helpers/SpotifyPodcast.js'
+import {searchPodcasts} from './Helpers/PodcastSearch.js'
 import * as fs from 'fs'
 import {getStoresPath, initTmpPath} from './Helpers/AppPaths.js'
 import {requestJson, requestJsonOrXml} from './Helpers/Request.js'
@@ -87,6 +88,17 @@ function mainEventStores(mainWindow) {
           )
           ipcMain.emit('stores-get')
         }
+      }
+    }
+  )
+  ipcMain.on(
+    'podcast-search',
+    async (event, query) => {
+      try {
+        const results = await searchPodcasts(query)
+        mainWindow.webContents.send('podcast-search-data', {query, results})
+      } catch (e) {
+        mainWindow.webContents.send('podcast-search-data', {query, results: []})
       }
     }
   )
