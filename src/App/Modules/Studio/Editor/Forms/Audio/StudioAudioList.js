@@ -7,25 +7,23 @@ import styles from './Audio.module.scss'
 
 const
   getAudios = (nodes) => {
-    const
-      processedAudios = {},
-      audioList = {}
-    getAudiosAction(nodes.startAction.action, nodes, false, {}, {}, processedAudios, audioList)
-    getAudiosAction(nodes.startAction.action, nodes, true, {}, {}, processedAudios, audioList)
+    const audioList = {}
+    getAudiosAction(nodes.startAction.action, nodes, false, {}, {}, audioList)
+    getAudiosAction(nodes.startAction.action, nodes, true, {}, {}, audioList)
     return audioList
   },
 
-  getAudiosAction = (aKey, nodes, includeHome, processedActionKeys, processedStageKeys, processedAudios, audioList) => {
+  getAudiosAction = (aKey, nodes, includeHome, processedActionKeys, processedStageKeys, audioList) => {
     if (processedActionKeys[aKey] !== undefined) {
       return
     }
     processedActionKeys[aKey] = true
     nodes.actions[aKey].forEach(
-      (v) => getAudiosStage(v.stage, nodes, includeHome, processedActionKeys, processedStageKeys, processedAudios, audioList)
+      (v) => getAudiosStage(v.stage, nodes, includeHome, processedActionKeys, processedStageKeys, audioList)
     )
   },
 
-  getAudiosStage = (sKey, nodes, includeHome, processedActionKeys, processedStageKeys, processedAudios, audioList) => {
+  getAudiosStage = (sKey, nodes, includeHome, processedActionKeys, processedStageKeys, audioList) => {
     if (processedStageKeys[sKey] !== undefined) {
       return
     }
@@ -36,8 +34,7 @@ const
       stage = nodes.stages[sKey],
       audio = stage.newAudio || stage.audio
 
-    if (audio && processedAudios[audio] === undefined) {
-      processedAudios[audio] = true
+    if (audio) {
       if(audioList[audio] === undefined) {
         audioList[audio] = [sKey]
       } else {
@@ -47,8 +44,8 @@ const
       }
     }
 
-    stage.ok !== null && getAudiosAction(stage.ok.action, nodes, includeHome, processedActionKeys, processedStageKeys, processedAudios, audioList)
-    includeHome && stage.home !== null && getAudiosAction(stage.home.action, nodes, includeHome, processedActionKeys, processedStageKeys, processedAudios, audioList)
+    stage.ok !== null && getAudiosAction(stage.ok.action, nodes, includeHome, processedActionKeys, processedStageKeys, audioList)
+    includeHome && stage.home !== null && getAudiosAction(stage.home.action, nodes, includeHome, processedActionKeys, processedStageKeys, audioList)
   }
 
 function StudioAudioList() {

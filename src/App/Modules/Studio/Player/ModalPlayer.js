@@ -161,6 +161,11 @@ function ModalPlayer({story, debugMode, defaultActionOptions, defaultActionIndex
       [metadata, stage]
     ),
 
+    imageSrc = useMemo(
+      () => image ? encodeURI(image.replaceAll('\\', '/')) + '?time=' + Date.now() : null,
+      [image]
+    ),
+
     onOk = useCallback(
       () => {
         if (stage === undefined || (stage !== null && !stage.control.ok)) {
@@ -222,7 +227,7 @@ function ModalPlayer({story, debugMode, defaultActionOptions, defaultActionIndex
       const audio = stage === null ? (metadata.newAudioTitle || metadata.audioTitle) : getStageAudioPath(stage, metadata)
 
       if (!audio) {
-        if (stage.control.autoplay) {
+        if (stage !== null && stage.control.autoplay) {
           const [aOptions, aIndex] = findNextAction(stage, nodes, items)
           setActionOptions(aOptions)
           setActionIndex(aIndex)
@@ -308,10 +313,10 @@ function ModalPlayer({story, debugMode, defaultActionOptions, defaultActionIndex
                       onClose={onClose}>
     <div className={styles.playerContainer} id="modal-player">
       <div className={styles.images}>
-        {image && <img src={encodeURI(image.replaceAll('\\', '/')) + '?time=' + Date.now()}
-                       className={styles.imageStory}
-                       alt=""/>}
-        {image && itemsGot.length > 0 && <PlayerInventory items={itemsGot} story={story}/>}
+        {imageSrc && <img src={imageSrc}
+                          className={styles.imageStory}
+                          alt=""/>}
+        {imageSrc && itemsGot.length > 0 && <PlayerInventory items={itemsGot} story={story}/>}
       </div>
       <ul className={styles.buttons}>
         <li className={styles.stageTitle}>{stageTitle !== null ? stageTitle : metadata.title}</li>
