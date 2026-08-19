@@ -10,11 +10,15 @@ function mainEventUpdate (mainWindow) {
   ipcMain.on(
     'check-update',
     async () => {
-      const json = await requestJson('https://api.github.com/repos/DantSu/Telmi-Sync/releases', {})
-      if (!json.length || !isNewerVersion(app.getVersion(), json[0].tag_name)) {
-        return
+      try {
+        const json = await requestJson('https://api.github.com/repos/DantSu/Telmi-Sync/releases', {})
+        if (!json.length || !isNewerVersion(app.getVersion(), json[0].tag_name)) {
+          return
+        }
+        mainWindow.webContents.send('check-update-data', 'https://telmi.fr/#download')
+      } catch (ignored) {
+        // best-effort check: stay silent offline
       }
-      mainWindow.webContents.send('check-update-data', 'https://telmi.fr/#download')
     }
   )
 }

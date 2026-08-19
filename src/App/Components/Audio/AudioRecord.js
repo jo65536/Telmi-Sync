@@ -65,12 +65,12 @@ function AudioRecord({title, onRecordEnded, className}) {
           track
             .applyConstraints(Object.assign(
               {},
-              capabilities.autoGainControl.includes(true) ? {autoGainControl: false} : null,
-              capabilities.channelCount.min <= 2 && capabilities.channelCount.max >= 2 ? {channelCount: 2} : null,
-              capabilities.echoCancellation.includes(true) ? {echoCancellation: true} : null,
-              capabilities.noiseSuppression.includes(true) ? {noiseSuppression: true} : null,
-              capabilities.sampleRate.min <= 44100 && capabilities.sampleRate.max >= 44100 ? {sampleRate: 44100} : null,
-              capabilities.sampleSize.min <= 16 && capabilities.sampleSize.max >= 16 ? {sampleSize: 16} : null,
+              Array.isArray(capabilities.autoGainControl) && capabilities.autoGainControl.includes(true) ? {autoGainControl: false} : null,
+              capabilities.channelCount !== undefined && capabilities.channelCount.min <= 2 && capabilities.channelCount.max >= 2 ? {channelCount: 2} : null,
+              Array.isArray(capabilities.echoCancellation) && capabilities.echoCancellation.includes(true) ? {echoCancellation: true} : null,
+              Array.isArray(capabilities.noiseSuppression) && capabilities.noiseSuppression.includes(true) ? {noiseSuppression: true} : null,
+              capabilities.sampleRate !== undefined && capabilities.sampleRate.min <= 44100 && capabilities.sampleRate.max >= 44100 ? {sampleRate: 44100} : null,
+              capabilities.sampleSize !== undefined && capabilities.sampleSize.min <= 16 && capabilities.sampleSize.max >= 16 ? {sampleSize: 16} : null,
             ))
             .then(() => {
               const mr = new MediaRecorder(stream)
@@ -80,7 +80,10 @@ function AudioRecord({title, onRecordEnded, className}) {
                 chunks.push(e.data)
               }
               mr.onstop = () => {
-                (new Blob(chunks, {type: 'audio/webm'}))
+                // release the microphone (MediaRecorder.stop() alone keeps the
+                // capture device open and the OS mic indicator lit)
+                stream.getTracks().forEach((t) => t.stop())
+                ;(new Blob(chunks, {type: 'audio/webm'}))
                   .arrayBuffer()
                   .then((arr) => ipcRenderer.send('audio-record-buffer-to-file', arr))
               }

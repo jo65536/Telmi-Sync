@@ -95,7 +95,12 @@ const
       .reduce(
         (acc, d) => {
           const md = readStoryMetadata(storiesPath, d)
-          return md !== null ? {...acc, stories: [...acc.stories, md]} : {...acc, error: [...acc.error, d]}
+          if (md !== null) {
+            acc.stories.push(md)
+          } else {
+            acc.error.push(d)
+          }
+          return acc
         },
         {stories: [], error:[]}
       )
