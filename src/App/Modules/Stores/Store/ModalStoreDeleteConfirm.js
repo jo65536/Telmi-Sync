@@ -1,4 +1,5 @@
 import { useLocale } from '../../../Components/Locale/LocaleHooks.js'
+import { stripHtmlTags } from '../../../Helpers/String.js'
 import ModalDialogConfirm from '../../../Components/Modal/Templates/ModalDialogs/ModalDialogConfirm.js'
 
 function ModalStoreDeleteConfirm (props) {
@@ -6,7 +7,7 @@ function ModalStoreDeleteConfirm (props) {
 
   return <ModalDialogConfirm {...props}
                              title={getLocale('store-delete')}
-                             message={getLocale('store-delete-confirm', props.store.name)}/>
+                             message={getLocale('store-delete-confirm', stripHtmlTags(props.store.name))}/>
 }
 
 export default ModalStoreDeleteConfirm

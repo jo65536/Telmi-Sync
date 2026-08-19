@@ -15,14 +15,20 @@ function checkDiskUsage(drive) {
 
 function mainEventTelmiOS(mainWindow) {
   const checkUsbDevices = async () => {
-    const drives = (await drivelist.list()).reduce((acc, d) => [...acc, ...d.mountpoints.map((p) => p.path)], [])
+    try {
+      const drives = (await drivelist.list()).reduce((acc, d) => [...acc, ...d.mountpoints.map((p) => p.path)], [])
 
-    for (const drive of drives) {
-      const telmiOS = parseTelmiOSAutorun(drive)
-      if (telmiOS !== null) {
-        mainWindow.webContents.send('telmios-data', readTelmiOSParameters({drive, telmiOS}))
-        return
+      for (const drive of drives) {
+        const telmiOS = parseTelmiOSAutorun(drive)
+        if (telmiOS !== null) {
+          mainWindow.webContents.send('telmios-data', readTelmiOSParameters({drive, telmiOS}))
+          return
+        }
       }
+    } catch (e) {
+      // drive ejected mid-scan or unreadable parameters: report no device
+      // instead of rejecting unhandled on every poll
+      console.log('checkUsbDevices : ' + e.toString())
     }
 
     mainWindow.webContents.send('telmios-data', null)

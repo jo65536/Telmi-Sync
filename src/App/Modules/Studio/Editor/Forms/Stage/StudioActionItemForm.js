@@ -38,6 +38,9 @@ function StudioActionItemForm({stageNode, action, actionPosition}) {
 
     onDefault = useCallback(
       () => {
+        if (stageNode.ok.indexItem !== undefined) {
+          delete stageNode.ok.indexItem
+        }
         stageNode.ok.index = actionPosition
         updateStory((s) => ({...s}))
       },

@@ -59,7 +59,7 @@ function mainEventStores(mainWindow) {
       if (checkStore(store)) {
         const
           storesPath = getStoresPath('stores.json'),
-          storesContent = fs.existsSync(storesPath) ? JSON.parse(fs.readFileSync(storesPath).toString('utf8')) : {}
+          storesContent = fs.existsSync(storesPath) ? JSON.parse(fs.readFileSync(storesPath).toString('utf8')) : {stores: []}
 
         if (storesContent.stores.find((s) => s.url === store.url) === undefined) {
           fs.writeFileSync(
@@ -189,8 +189,7 @@ function mainEventStores(mainWindow) {
                         return acc
                       }
 
-                      return [
-                        ...acc,
+                      acc.push(
                         {
                           title: getFirstArrayElement(v.title) || '',
                           age: 0,
@@ -209,7 +208,8 @@ function mainEventStores(mainWindow) {
                           updated_at: getFirstArrayElement(v.pubDate) || '1970-01-01T00:00:00.000Z',
                           uuid: '',
                           version: 0
-                        }]
+                        })
+                      return acc
                     },
                     []
                   )
@@ -344,6 +344,9 @@ function mainEventStores(mainWindow) {
       requestJson('https://gist.githubusercontent.com/DantSu/75dfd354b587e7e353302834967e48bc/raw/rss-feed.json', {})
         .then((res) => {
           mainWindow.webContents.send('store-rssfeed-data', res)
+        })
+        .catch((e) => {
+          console.log('store-rssfeed-get : ' + e.toString())
         })
     }
   )

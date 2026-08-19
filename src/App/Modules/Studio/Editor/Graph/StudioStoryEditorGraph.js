@@ -233,7 +233,7 @@ function StudioStoryEditorGraph({scale}, ref) {
   const
     [contextMenu, setContextMenu] = useState(null),
     {story: {nodes}} = useStudioStory(),
-    {find} = useStudioStage(),
+    {find, setFind} = useStudioStage(),
     {lines, stages, actions, stagesPos} = useMemo(() => getNodes(nodes, setContextMenu), [nodes])
 
   useEffect(() => {setContextMenu(null)}, [nodes])
@@ -243,11 +243,14 @@ function StudioStoryEditorGraph({scale}, ref) {
   }, [])
 
   useEffect(() => {
-    if (find !== null && stagesPos[find] !== undefined) {
-      ref.current.scrollLeft = stagesPos[find].x * scale - ref.current.clientWidth / 2
-      ref.current.scrollTop = stagesPos[find].y * scale - ref.current.clientHeight / 2
+    if (find !== null) {
+      if (stagesPos[find] !== undefined) {
+        ref.current.scrollLeft = stagesPos[find].x * scale - ref.current.clientWidth / 2
+        ref.current.scrollTop = stagesPos[find].y * scale - ref.current.clientHeight / 2
+      }
+      setFind(null)
     }
-  }, [find])
+  }, [find, setFind])
 
   return <SVGLayout observer={nodes}
                     scale={scale}
