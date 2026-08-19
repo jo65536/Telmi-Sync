@@ -36,6 +36,11 @@
   font-size: 14px;
 }
 
+.taskDescription {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .taskTitle, .taskDescriptionEllipsis {
   white-space: nowrap;
   overflow: hidden;

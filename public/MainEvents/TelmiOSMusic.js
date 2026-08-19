@@ -32,16 +32,25 @@ function mainEventTelmiOSMusicReader(mainWindow) {
     }
   )
 
+  let musicsTransferTask = null
+
+  ipcMain.on('musics-transfer-cancel', async () => {
+    if (musicsTransferTask !== null) {
+      musicsTransferTask.process.kill()
+    }
+  })
+
   ipcMain.on('musics-transfer', async (event, telmiDevice, musics) => {
     const
       musicPath = getTelmiOSMusicPath(telmiDevice.drive),
       onFinished = () => {
+        musicsTransferTask = null
         mainWindow.webContents.send('musics-transfer-task', '', '', 0, 0)
         ipcMain.emit('telmios-musics-get', event, telmiDevice)
         ipcMain.emit('telmios-diskusage', event, telmiDevice)
       }
 
-    runProcess(
+    musicsTransferTask = runProcess(
       mainWindow,
       path.join('Music', 'MusicTransfer.js'),
       [musicPath, ...musics.map((m) => m.id)],

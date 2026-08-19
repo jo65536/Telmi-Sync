@@ -291,6 +291,8 @@ const en = {
   'studio': 'Studio',
   'studio-scene': 'Scene',
   'studio-edit-story': 'Edit the story in the studio',
+  'studio-story-unsaved': 'Unsaved story!',
+  'studio-story-unsaved-confirm': 'This story has been modified. Are you sure you want to leave the Studio without saving your changes?',
   'studio-story-save': 'Save the story ?',
   'studio-story-save-confirm': 'This story has been updated. Would you like to save your changes ?',
   'studio-inventory-delete-error': 'Unable to delete this item !',
