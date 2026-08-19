@@ -11,7 +11,7 @@ import ButtonIconMicrophone from '../Buttons/Icons/ButtonIconMicrophone.js'
 
 import styles from './Table.module.scss'
 
-function TableListRow ({data, selected, onSelect, onPlay, onStudio, onInfo, onOptimizeAudio, onEdit, onDownload, onDelete}) {
+function TableListRow ({data, columns, selected, onSelect, onPlay, onStudio, onInfo, onOptimizeAudio, onEdit, onDownload, onDelete}) {
   const
     {getLocale} = useLocale(),
     action = (callback) => (e) => {
@@ -27,8 +27,17 @@ function TableListRow ({data, selected, onSelect, onPlay, onStudio, onInfo, onOp
   return <li className={[styles.listRow, selected ? styles.listRowSelected : '', data.cellDisabled ? styles.listRowDisabled : ''].join(' ')}
              onClick={onRSelect}>
     <img src={data.image} className={styles.listRowImage} alt="" loading="lazy"/>
-    <span className={styles.listRowTitle} title={data.cellTitle}>{data.cellTitle}</span>
-    <span className={styles.listRowSubtitle} title={data.cellSubtitle}>{data.cellSubtitle || ''}</span>
+    {
+      columns.map((c, k) => {
+        const value = typeof c.format === 'function' ? c.format(data[c.key], data) : data[c.key]
+        return <span key={'col-' + c.key}
+                     className={k === 0 ? styles.listRowTitle : styles.listRowSubtitle}
+                     style={{flex: (c.flex || 1) + ' 1 0'}}
+                     title={String(value === undefined || value === null ? '' : value)}>
+          {value === undefined || value === null ? '' : value}
+        </span>
+      })
+    }
     <span className={styles.listRowActions}>
       {onStudio && <ButtonIconMicrophone title={getLocale('studio-edit-story')} onClick={action(onStudio)} className={styles.listRowActionButton}/>}
       {onPlay && <ButtonIconPlay title={getLocale('story-play')} onClick={action(onPlay)} className={styles.listRowActionButton}/>}

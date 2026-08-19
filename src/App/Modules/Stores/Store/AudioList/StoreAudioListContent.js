@@ -14,6 +14,13 @@ import ModalDialogAlert from '../../../../Components/Modal/Templates/ModalDialog
 
 import styles from './StoreAudioList.module.scss'
 
+
+const audioListColumns = [
+  {key: 'title', locale: 'column-name', flex: 3},
+  {key: 'author', locale: 'column-author', flex: 2},
+  {key: 'created_at', locale: 'column-date', flex: 1, format: (v) => v ? new Date(v).toLocaleDateString() : ''}
+]
+
 function StoreAudioListContent({store, storeData}) {
   const
     {getLocale} = useLocale(),
@@ -73,7 +80,8 @@ function StoreAudioListContent({store, storeData}) {
       onSelect={onSelect}
       onSelectAll={onSelectAll}
       additionalHeaderButtons={additionalHeaderButtons}
-      isLoading={storeData === null}/>
+      isLoading={storeData === null}
+      listColumns={audioListColumns}/>
     {
       storeData !== null &&
       <div className={styles.audioListContainer}>
