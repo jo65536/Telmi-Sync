@@ -265,6 +265,7 @@ const en = {
   'music-search-cover': 'Search a cover image',
   'music-searching-cover': 'Searching a cover image',
   'music-conversion-failed': 'Audio file conversion failed',
+  'unexpected-process-output': 'Unexpected process output',
   'music-edit': 'Edit the music track',
   'music-delete': 'Delete the music track',
   'music-delete-confirm': 'Are you sure you want to delete the music track <strong>"{0}"</strong> ?',

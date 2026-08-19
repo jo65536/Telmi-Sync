@@ -77,8 +77,8 @@ function convertMusic (srcPath) {
             .then(stepCheckCover)
             .catch(stepCheckCover)
         })
-        .catch(() => {
-          process.stderr.write('music-conversion-failed')
+        .catch((e) => {
+          process.stderr.write('music-conversion-failed' + (e instanceof Error && e.message !== '' ? ' : ' + e.message : ''))
         })
     }
 

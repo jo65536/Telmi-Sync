@@ -265,6 +265,7 @@ const fr = {
   'music-search-cover': 'Rechercher l\'image de couverture',
   'music-searching-cover': 'Recherche d\'une image de couverture',
   'music-conversion-failed': 'Echec de conversion du fichier audio',
+  'unexpected-process-output': 'Sortie inattendue du processus',
   'music-edit': 'Editer la musique',
   'music-delete': 'Supprimer la musique',
   'music-delete-confirm': 'Êtes-vous sûr de vouloir supprimer la musique <strong>"{0}"</strong> ?',

@@ -2,11 +2,13 @@ import styles from './ModalTasksVisualizer.module.scss'
 import { useLocale } from '../../../Locale/LocaleHooks.js'
 
 function TaskError ({task, message}) {
-  const {getLocale} = useLocale()
+  const
+    {getLocale} = useLocale(),
+    [messageKey, ...messageDetail] = String(message).split(' : ')
   return <li className={styles.waitingTaskContainer}>
     <div className={styles.taskTextes}>
       <h2 className={styles.taskTitle}>{getLocale(task) + '\u200e'}</h2>
-      <p className={styles.taskDescription}>{getLocale(message)}.</p>
+      <p className={styles.taskDescription}>{getLocale(messageKey) + (messageDetail.length ? ' : ' + messageDetail.join(' : ') : '')}.</p>
     </div>
     <div className={styles.taskIcon}>{'\uf071'}</div>
   </li>
