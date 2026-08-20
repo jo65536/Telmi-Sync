@@ -1,10 +1,16 @@
-import ModalElectronTaskVisualizer from '../../../../Components/Electron/Modal/ModalElectronTaskVisualizer.js'
+import { useEffect } from 'react'
+import { useTaskManager } from '../../../../Components/TaskManager/TaskManagerHooks.js'
 
+// Fires the background task and removes itself immediately: the modal never
+// shows; progress lives in the global task bar.
 function ModalStoreDownload ({stories, onClose}) {
-  return <ModalElectronTaskVisualizer taskName="store-download"
-                                      taskCancellable={true}
-                                      dataSent={[stories]}
-                                      onClose={onClose}/>
+  const {startTask} = useTaskManager()
+  useEffect(() => {
+    startTask('store-download', [stories], {cancellable: true})
+    onClose()
+  }, []) // eslint-disable-line
+
+  return null
 }
 
 export default ModalStoreDownload

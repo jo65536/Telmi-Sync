@@ -40,6 +40,12 @@ function mainEventLocalStoriesReader(mainWindow) {
     }
   )
 
+  let mergeTask = null
+  ipcMain.on('local-stories-merge-cancel', async () => {
+    if (mergeTask !== null) {
+      mergeTask.process.kill()
+    }
+  })
   ipcMain.on(
     'local-stories-merge',
     async (event, story) => {
@@ -49,7 +55,7 @@ function mainEventLocalStoriesReader(mainWindow) {
       const jsonPath = path.join(initTmpPath('json'), 'stories-merge.json')
       fs.writeFileSync(jsonPath, JSON.stringify(story))
 
-      runProcess(
+      mergeTask = runProcess(
         mainWindow,
         path.join('Stories', 'StoriesMerge.js'),
         [jsonPath],
@@ -61,6 +67,7 @@ function mainEventLocalStoriesReader(mainWindow) {
           mainWindow.webContents.send('local-stories-merge-error', story.title, error)
         },
         () => {
+          mergeTask = null
           mainWindow.webContents.send('local-stories-merge-task', '', '', 0, 0)
           ipcMain.emit('local-stories-get')
         }
@@ -68,8 +75,17 @@ function mainEventLocalStoriesReader(mainWindow) {
     }
   )
 
+  let optimizeTask = null, optimizeCancelled = false
+  ipcMain.on('stories-optimize-audio-cancel', async () => {
+    optimizeCancelled = true
+    if (optimizeTask !== null) {
+      optimizeTask.process.kill()
+    }
+  })
   const runOptimizeAudio = (stories) => {
-    if (!stories.length) {
+    if (optimizeCancelled || !stories.length) {
+      optimizeTask = null
+      mainWindow.webContents.send('stories-optimize-audio-waiting', [])
       mainWindow.webContents.send('stories-optimize-audio-task', '', '', 0, 0)
       return ipcMain.emit('local-stories-get')
     }
@@ -78,7 +94,7 @@ function mainEventLocalStoriesReader(mainWindow) {
     mainWindow.webContents.send('stories-optimize-audio-task', story.title, 'initialize', 0, 1)
     mainWindow.webContents.send('stories-optimize-audio-waiting', stories)
 
-    runProcess(
+    optimizeTask = runProcess(
       mainWindow,
       path.join('Stories', 'StoriesOptimizeAudio.js'),
       [story.path],
@@ -92,7 +108,10 @@ function mainEventLocalStoriesReader(mainWindow) {
       () => runOptimizeAudio(stories)
     )
   }
-  ipcMain.on('stories-optimize-audio', async (event, stories) => runOptimizeAudio(stories))
+  ipcMain.on('stories-optimize-audio', async (event, stories) => {
+    optimizeCancelled = false
+    runOptimizeAudio(stories)
+  })
 
   ipcMain.on(
     'local-stories-delete',

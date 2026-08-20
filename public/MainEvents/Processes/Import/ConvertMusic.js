@@ -8,11 +8,18 @@ import { getMusicBrainzCoverImage } from '../Helpers/MusicBrainzApi.js'
 import { convertMusicImage } from './Helpers/ImageFile.js'
 import { musicObjectToName } from '../../Helpers/Music.js'
 
-function convertMusic (srcPath) {
-  process.stdout.write('*music-extracting-metadata*0*3*')
+function convertMusic (srcPath, opts = {}) {
+  const
+    emitProgress = opts.emitProgress !== false,
+    tmpDirName = opts.tmpDir || 'music',
+    onDone = opts.onDone || (() => process.stdout.write('success')),
+    onError = opts.onError || ((e) => process.stderr.write('music-conversion-failed' + (e instanceof Error && e.message !== '' ? ' : ' + e.message : ''))),
+    progress = (msg, cur, total) => { if (emitProgress) process.stdout.write('*' + msg + '*' + cur + '*' + total + '*') }
+
+  progress('music-extracting-metadata', 0, 3)
 
   const
-    tmpPath = initTmpPath('music'),
+    tmpPath = initTmpPath(tmpDirName),
     tmpMetadataTxtPath = path.join(tmpPath, 'metadata.txt'),
     metadata = {
       artist: 'unknow',
@@ -32,12 +39,12 @@ function convertMusic (srcPath) {
 
         stepCopyDefaultCover = () => {
           fs.copyFileSync(path.join(getExtraResourcesPath(), 'assets', 'images', 'unknow-album.png'), coverPath)
-          process.stdout.write('success')
+          onDone()
         },
 
         stepCheckCover = () => {
           if (fs.existsSync(coverPath)) {
-            return process.stdout.write('success')
+            return onDone()
           }
 
           if (metadata.artist === 'unknow' || metadata.album === 'unknow') {
@@ -51,23 +58,30 @@ function convertMusic (srcPath) {
                   if (!fs.existsSync(coverPath)) {
                     return stepCopyDefaultCover()
                   }
-                  process.stdout.write('success')
+                  onDone()
                 })
                 .catch(stepCopyDefaultCover)
             })
             .catch(stepCopyDefaultCover)
         }
 
-      process.stdout.write('*converting-audio*1*3*')
+      progress('converting-audio', 1, 3)
 
-      if(fs.existsSync(musicDstPath)) {
-        process.stdout.write('success')
+      // Under parallel import several slots run in this same process, so a
+      // shared claim set makes "is this output already being produced?"
+      // atomic (single-threaded JS between check and add) — avoiding two slots
+      // writing the same destination mp3 concurrently.
+      if (fs.existsSync(musicDstPath) || (opts.claimedDst && opts.claimedDst.has(musicDstPath))) {
+        onDone()
         return
+      }
+      if (opts.claimedDst) {
+        opts.claimedDst.add(musicDstPath)
       }
 
       convertAudio(srcPath, musicDstPath, true, true)
         .then(() => {
-          process.stdout.write('*music-searching-cover*2*3*')
+          progress('music-searching-cover', 2, 3)
 
           if(checkCoverExists(metadata.artist, metadata.album, coverPath)) {
             return stepCheckCover()
@@ -77,9 +91,7 @@ function convertMusic (srcPath) {
             .then(stepCheckCover)
             .catch(stepCheckCover)
         })
-        .catch((e) => {
-          process.stderr.write('music-conversion-failed' + (e instanceof Error && e.message !== '' ? ' : ' + e.message : ''))
-        })
+        .catch(onError)
     }
 
   audioExtractMetadata(srcPath, tmpMetadataTxtPath)

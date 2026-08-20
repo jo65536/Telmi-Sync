@@ -7,12 +7,15 @@ import LocaleProvider from './Components/Locale/LocaleProvider.js'
 import TelmiOSProvider from './Components/TelmiOS/TelmiOSProvider.js'
 import TelmiSyncParamsProvider from './Components/TelmiSyncParams/TelmiSyncParamsProvider.js'
 import ErrorListener from './Components/ErrorListener/ErrorListener.js'
+import TaskManagerProvider from './Components/TaskManager/TaskManagerProvider.js'
+import TaskBar from './Components/TaskManager/TaskBar.js'
 
 import './App.scss'
 
 function App() {
   return <LocaleProvider>
     <TelmiSyncParamsProvider>
+      <TaskManagerProvider>
       <ModalProvider>
         <TelmiOSProvider>
           <LocalStoriesProvider>
@@ -23,6 +26,8 @@ function App() {
         </TelmiOSProvider>
         <ErrorListener/>
       </ModalProvider>
+      <TaskBar/>
+      </TaskManagerProvider>
     </TelmiSyncParamsProvider>
   </LocaleProvider>
 }

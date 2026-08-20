@@ -1,0 +1,172 @@
+@use "src/App/variables" as *;
+
+.container {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.bar {
+  -webkit-app-region: no-drag;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 16px;
+  background: rgba(245, 245, 247, 0.96);
+  border-top: 1px solid $separator;
+  cursor: pointer;
+  font-size: 13px;
+  color: $textPrimary;
+}
+
+.barError {
+  background: rgba(255, 59, 48, 0.10);
+}
+
+.barChevron {
+  font-family: icons;
+  font-weight: bold;
+  font-size: 11px;
+  color: $textSecondary;
+}
+
+.barSummary {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.barProgress {
+  flex: 1 1 auto;
+}
+
+.panel {
+  max-height: 42vh;
+  overflow-y: auto;
+  background: $surfacePanel;
+  border-top: 1px solid $separator;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.item {
+  padding: 10px 16px;
+  border-bottom: 1px solid $separator;
+}
+
+.itemHead {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+.itemLabel {
+  flex: 1 1 auto;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemStatus {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: $textSecondary;
+}
+
+.itemAction {
+  flex: 0 0 auto;
+  font-size: 14px;
+  padding: 2px 4px;
+  color: $textSecondary;
+}
+
+.iconDone {
+  font-family: icons;
+  font-weight: bold;
+  color: $success;
+  margin-right: 4px;
+}
+
+.iconError {
+  font-family: icons;
+  font-weight: bold;
+  color: $danger;
+  margin-right: 4px;
+}
+
+.itemProgress {
+  margin: 6px 0;
+}
+
+.itemSubtitle {
+  font-size: 12px;
+  color: $textSecondary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemSubtitleError {
+  color: $danger;
+}
+
+.itemWaiting {
+  font-size: 12px;
+  color: $textSecondary;
+  margin-top: 2px;
+}
+
+.itemError {
+  font-size: 12px;
+  color: $danger;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.itemFiles {
+  margin: 6px 0 2px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemFile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: $textSecondary;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.itemFileSpinner {
+  flex: 0 0 auto;
+  font-family: icons;
+  font-weight: bold;
+  font-size: 11px;
+  color: $accent;
+  animation: taskSpin 1s linear infinite;
+}
+
+.itemFileName {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes taskSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

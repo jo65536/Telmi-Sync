@@ -1,9 +1,16 @@
-import ModalElectronTaskVisualizer from '../../../../Components/Electron/Modal/ModalElectronTaskVisualizer.js'
+import { useEffect } from 'react'
+import { useTaskManager } from '../../../../Components/TaskManager/TaskManagerHooks.js'
 
-function ModalTelmiOSEject ({drive, onClose}) {
-  return <ModalElectronTaskVisualizer taskName="telmios-cardmaker"
-                                      dataSent={[drive]}
-                                      onClose={onClose}/>
+// Fires the background task and removes itself immediately: the modal never
+// shows; progress lives in the global task bar.
+function ModalTelmiOSCardMakerTask ({drive, onClose}) {
+  const {startTask} = useTaskManager()
+  useEffect(() => {
+    startTask('telmios-cardmaker', [drive], {cancellable: false})
+    onClose()
+  }, []) // eslint-disable-line
+
+  return null
 }
 
-export default ModalTelmiOSEject
+export default ModalTelmiOSCardMakerTask

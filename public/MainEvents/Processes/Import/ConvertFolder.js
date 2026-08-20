@@ -5,6 +5,7 @@ import convertFolderFS from './ConvertFolderFS.js'
 import convertFolderTelmi from './ConvertFolderTelmi.js'
 import convertFolderStoryPack from './ConvertFolderStoryPack.js'
 import convertFolderAudioList from './ConvertFolderAudioList.js'
+import convertFolderAudios from './ConvertFolderAudios.js'
 
 const
   FORMAT_UNKNOW = -1,
@@ -114,7 +115,9 @@ function convertFolder (storyPath, storyName) {
       convertFolderAudioList(storyPath, storyName)
       break
     default:
-      process.stderr.write('story-format-invalid')
+      // Not a recognized story pack: treat the folder tree as a music source
+      // and import every audio file found in it and its subfolders.
+      convertFolderAudios(storyPath)
   }
 }
 

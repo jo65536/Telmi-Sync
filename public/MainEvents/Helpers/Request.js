@@ -26,6 +26,7 @@ const
           {
             method: 'GET',
             rejectUnauthorized: false,
+            timeout: 15000,
             headers: Object.assign(
               {...defaultHeader},
               bytesStart > 0 ? {'Range': 'bytes=' + bytesStart + '-' + (bytesStart + 268435455)} : null
