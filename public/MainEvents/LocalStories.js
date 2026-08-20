@@ -11,8 +11,10 @@ function mainEventLocalStoriesReader(mainWindow) {
   ipcMain.on(
     'local-stories-get',
     async () => {
+      // A story can be unreadable simply because it is still being written
+      // (mid-import) — don't raise a warning per unreadable entry, it just spams
+      // the UI during a batch import. Only the readable stories are published.
       const list = readStories(getStoriesPath())
-      list.error.forEach((d) => mainWindow.webContents.send('error-warning', {title: 'story-corrupted', message: 'Local drive | Story : ' + d}))
       mainWindow.webContents.send('local-stories-data', list.stories)
     }
   )

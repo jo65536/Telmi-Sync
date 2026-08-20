@@ -59,7 +59,9 @@ const
       !fs.existsSync(nodesPath) || !fs.existsSync(mdPath) || !fs.existsSync(mp3Path) ||
       !fs.existsSync(pngPath) || !fs.existsSync(audiosPath) || !fs.existsSync(imagesPath)
     ) {
-      rmDirectory(storyPath)
+      // Never delete here: a story can be missing files simply because it is
+      // still being written (mid-import), and a library read must not destroy a
+      // half-written story. Just skip it; the next read will pick it up.
       return null
     }
 
