@@ -15,7 +15,14 @@ async function main (drive) {
     return process.stdout.write('telmios-not-found')
   }
 
-  const json = await requestJson('https://api.github.com/repos/DantSu/Telmi-story-teller/releases', {})
+  let json
+  try {
+    json = await requestJson('https://api.github.com/repos/DantSu/Telmi-story-teller/releases', {})
+  } catch (e) {
+    // Best-effort check: if GitHub is unreachable (offline, firewall), treat
+    // the card as up to date rather than failing the whole connect.
+    return process.stdout.write('success')
+  }
 
   if (!json.length) {
     return process.stdout.write('success')

@@ -13,7 +13,9 @@ function TaskBarItem ({task, onCancel, onDismiss}) {
     current = p ? p.current : 0,
     subtitle = p
       ? (p.title ? p.title : getLocale(p.message))
-      : (task.status === 'done' ? getLocale('task-done') : getLocale('task-cancelling'))
+      : (task.status === 'done'
+          ? getLocale('task-done')
+          : (task.status === 'cancelling' ? getLocale('task-cancelling') : ''))
 
   return <li className={styles.item}>
     <div className={styles.itemHead}>
