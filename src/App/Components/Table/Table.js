@@ -19,6 +19,7 @@ import ButtonIconWave from '../Buttons/Icons/ButtonIconWave.js'
 import ButtonIconXMark from '../Buttons/Icons/ButtonIconXMark.js'
 import ButtonIconListView from '../Buttons/Icons/ButtonIconListView.js'
 import ButtonIconGridView from '../Buttons/Icons/ButtonIconGridView.js'
+import ButtonIconFilter from '../Buttons/Icons/ButtonIconFilter.js'
 
 import styles from './Table.module.scss'
 
@@ -54,6 +55,27 @@ function Table({
     [dataFiltered, setDataFiltered] = useState([]),
     [listSort, setListSort] = useState(null),
     viewMode = (tableState !== null && tableState.view === 'list') ? 'list' : 'grid',
+    hideDisabled = tableState !== null && tableState.hideDisabled === true,
+    hasDisabled = useMemo(
+      () => data.some((d) => d.tableGroup !== undefined ? d.tableChildren.some((c) => c.cellDisabled) : d.cellDisabled),
+      [data]
+    ),
+    displayedData = useMemo(
+      () => hideDisabled
+        ? dataFiltered.reduce((acc, d) => {
+            if (d.tableGroup !== undefined) {
+              const children = d.tableChildren.filter((c) => !c.cellDisabled)
+              if (children.length) {
+                acc.push({...d, tableChildren: children})
+              }
+            } else if (!d.cellDisabled) {
+              acc.push(d)
+            }
+            return acc
+          }, [])
+        : dataFiltered,
+      [dataFiltered, hideDisabled]
+    ),
     columns = useMemo(
       () => (Array.isArray(listColumns) && listColumns.length) ?
         listColumns :
@@ -174,6 +196,15 @@ function Table({
       [dataFiltered, onSelect, selectedData]
     ),
 
+    onToggleFilter = useCallback(
+      () => setTableState((tableState) => ({
+        search: '',
+        group: {},
+        ...tableState,
+        hideDisabled: !(tableState !== null && tableState.hideDisabled === true)
+      })),
+      [setTableState]
+    ),
     onToggleView = useCallback(
       () => setTableState((tableState) => ({
         search: '',
@@ -198,7 +229,7 @@ function Table({
           return []
         }
         const
-          rows = dataFiltered.reduce(
+          rows = displayedData.reduce(
             (acc, d) => {
               if (d.tableGroup !== undefined) {
                 acc.push(...d.tableChildren)
@@ -218,7 +249,7 @@ function Table({
           return dir * String(va === undefined || va === null ? '' : va).localeCompare(String(vb === undefined || vb === null ? '' : vb), undefined, {numeric: true})
         })
       },
-      [dataFiltered, viewMode, sortField, sortAsc]
+      [displayedData, viewMode, sortField, sortAsc]
     ),
 
     onListSelect = useCallback(
@@ -243,12 +274,12 @@ function Table({
 
     onSelectAllCallback = useCallback(
       () => typeof onSelectAll === 'function' && onSelectAll(
-        dataFiltered.reduce(
+        displayedData.reduce(
           (acc, d) => d.tableGroup !== undefined ? [...acc, ...d.tableChildren] : [...acc, d],
           []
         )
       ),
-      [onSelectAll, dataFiltered]
+      [onSelectAll, displayedData]
     )
 
   useElectronEmitter('tablestate-get', [id, data])
@@ -261,6 +292,7 @@ function Table({
       setTableState({
         search: tableState === null ? '' : tableState.search,
         view: (tableState !== null && tableState.view === 'list') ? 'list' : 'grid',
+        hideDisabled: tableState !== null && tableState.hideDisabled === true,
         group: data.reduce(
           (acc, v) => {
             if (v.tableGroup === undefined) {
@@ -349,6 +381,12 @@ function Table({
       }
 
       <ul className={styles.headerIcons}>
+        {
+          hasDisabled &&
+          <TableHeaderIcon componentIcon={ButtonIconFilter}
+                           title={hideDisabled ? 'filter-show-all' : 'filter-not-on-device'}
+                           onClick={onToggleFilter}/>
+        }
         <TableHeaderIcon componentIcon={viewMode === 'list' ? ButtonIconGridView : ButtonIconListView}
                          title={viewMode === 'list' ? 'view-grid' : 'view-list'}
                          onClick={onToggleView}/>
@@ -368,15 +406,17 @@ function Table({
     <div className={styles.content}>
       <div className={styles.contentScroller}>
         {
-          !isLoading && dataFiltered.length === 0 && (tableState !== null || data.length === 0) &&
+          !isLoading && displayedData.length === 0 && (tableState !== null || data.length === 0) &&
           <p className={styles.emptyState}>{
             (tableState !== null && tableState.search !== '' && data.length > 0) ?
               getLocale('table-empty-search', tableState.search) :
-              (emptyMessage || getLocale('table-empty'))
+              (hideDisabled && dataFiltered.length > 0 ?
+                getLocale('filter-all-on-device') :
+                (emptyMessage || getLocale('table-empty')))
           }</p>
         }
         {
-          viewMode === 'list' && dataFiltered.length > 0 &&
+          viewMode === 'list' && displayedData.length > 0 &&
           <ul className={styles.listView}>
             <li className={styles.listViewHeader}>
               <span className={styles.listViewHeaderImage}/>
@@ -405,7 +445,7 @@ function Table({
           </ul>
         }
         {viewMode !== 'list' && <ul className={styles.cells}>{
-          dataFiltered.map((v, k) => {
+          displayedData.map((v, k) => {
             if (v.tableGroup !== undefined) {
               return <TableGroup key={'cell-' + k}
                                  data={v}
