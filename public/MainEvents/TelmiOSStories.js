@@ -2,7 +2,7 @@ import {ipcMain} from 'electron'
 import {rmDirectory} from './Helpers/Files.js'
 import {getTelmiOSStoriesPath} from './Helpers/TelmiOSPath.js'
 import {deleteStories} from './Helpers/StoriesProcess.js'
-import {readStories} from './Helpers/Stories.js'
+import {getCachedStories} from './Helpers/TelmiOSScanCache.js'
 import runProcess from './Processes/RunProcess.js'
 import * as path from 'path'
 
@@ -16,7 +16,7 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       }
       let list = {stories: [], error: []}
       try {
-        list = readStories(getTelmiOSStoriesPath(telmiDevice.drive))
+        list = getCachedStories(telmiDevice.drive)
       } catch (e) {
         console.log('telmios-stories-get : ' + e.toString())
       }

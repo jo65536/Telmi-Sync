@@ -1,5 +1,6 @@
 import {ipcMain} from 'electron'
-import {deleteMusic, readMusic} from './Helpers/MusicFiles.js'
+import {deleteMusic} from './Helpers/MusicFiles.js'
+import {getCachedMusics} from './Helpers/TelmiOSScanCache.js'
 import {getTelmiOSMusicPath} from './Helpers/TelmiOSPath.js'
 import runProcess from './Processes/RunProcess.js'
 import * as path from 'path'
@@ -10,7 +11,7 @@ function mainEventTelmiOSMusicReader(mainWindow) {
     async (event, telmiDevice) => {
       let musics = []
       try {
-        musics = telmiDevice !== null ? readMusic(getTelmiOSMusicPath(telmiDevice.drive)) : []
+        musics = telmiDevice !== null ? getCachedMusics(telmiDevice.drive) : []
       } catch (e) {
         console.log('telmios-musics-get : ' + e.toString())
       }
