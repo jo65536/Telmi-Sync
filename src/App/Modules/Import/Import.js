@@ -5,10 +5,10 @@ import DropFiles from '../../Components/DropFiles/DropFiles.js'
 
 function Import ({children}) {
   const
-    {startTask} = useTaskManager(),
+    {importFiles} = useTaskManager(),
     onFilesDropped = useCallback(
-      (filesPath) => startTask('import', [filesPath], {cancellable: true}),
-      [startTask]
+      (filesPath) => importFiles(filesPath),
+      [importFiles]
     )
 
   useElectronListener(

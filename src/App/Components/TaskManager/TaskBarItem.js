@@ -4,56 +4,71 @@ import ButtonIconXMark from '../Buttons/Icons/ButtonIconXMark.js'
 
 import styles from './TaskManager.module.scss'
 
+const baseName = (s) => String(s || '').split(/[\\/]/).pop()
+
 function TaskBarItem ({task, onCancel, onDismiss}) {
   const
     {getLocale} = useLocale(),
     p = task.processing,
+    isRunning = task.status === 'running' || task.status === 'cancelling',
+    isQueued = isRunning && task.queued === true,
     hasError = task.errors.length > 0,
     total = p ? p.total : 0,
     current = p ? p.current : 0,
-    subtitle = p
-      ? (p.title ? p.title : getLocale(p.message))
-      : (task.status === 'done'
-          ? getLocale('task-done')
-          : (task.status === 'cancelling' ? getLocale('task-cancelling') : ''))
+    label = task.fileTask ? task.label : getLocale(task.label),
 
-  return <li className={styles.item}>
+    // "name — reason", localizing whichever part is a known key. Handles both
+    // import errors (task = a file path) and notifications (task = a locale key).
+    errorLine = (err) => {
+      const
+        errTask = String(err.task || ''),
+        isPath = errTask.includes('/') || errTask.includes('\\'),
+        rawMsg = String(err.message || ''),
+        msgKey = rawMsg.split(' : ')[0],
+        localizedMsg = getLocale(msgKey),
+        primary = isPath ? baseName(errTask) : getLocale(errTask),
+        secondary = isPath ? (localizedMsg !== msgKey ? localizedMsg : rawMsg) : rawMsg
+      return secondary ? primary + ' — ' + secondary : primary
+    },
+
+    glyph = isQueued ? '○' : (isRunning ? '⟳' : (hasError ? '✕' : '✓')),
+    glyphClass = isQueued ? styles.glyphQueued : (isRunning ? styles.glyphSpin : (hasError ? styles.glyphErr : styles.glyphOk)),
+
+    subtitle = task.status === 'cancelling'
+      ? getLocale('task-cancelling')
+      : (isRunning && !isQueued && p && p.title ? baseName(p.title) : '')
+
+  return <li className={[styles.item, hasError ? styles.itemErr : ''].join(' ')}>
     <div className={styles.itemHead}>
-      <span className={styles.itemLabel}>{getLocale(task.label)}</span>
-      <span className={styles.itemStatus}>
-        {task.status === 'done' && ''}
-        {hasError && ''}
-        {p && total > 1 ? (current + ' / ' + total) : ''}
-      </span>
+      <span className={[styles.itemGlyph, glyphClass].join(' ')}>{glyph}</span>
+      <span className={styles.itemLabel} title={label}>{label}</span>
+      {!isQueued && p && total > 1 && <span className={styles.itemCount}>{current + ' / ' + total}</span>}
       {
-        task.status === 'done' || hasError
-          ? <ButtonIconXMark className={styles.itemAction} title={getLocale('dismiss')} onClick={onDismiss}/>
-          : (task.cancellable && <ButtonIconXMark className={styles.itemAction} title={getLocale('cancel')} onClick={onCancel}/>)
+        isRunning
+          ? (task.cancellable && <ButtonIconXMark className={styles.itemAction} title={getLocale('cancel')} onClick={onCancel}/>)
+          : <ButtonIconXMark className={styles.itemAction} title={getLocale('dismiss')} onClick={onDismiss}/>
       }
     </div>
-    {p && <ProgressBar className={styles.itemProgress} current={current} total={total}/>}
-    <p className={[styles.itemSubtitle, hasError ? styles.itemSubtitleError : ''].join(' ')} title={subtitle}>{subtitle}</p>
-    {
-      (task.items || []).length > 0 &&
-      <ul className={styles.itemFiles}>{
-        task.items.map((it, k) => <li key={'file-' + k} className={styles.itemFile} title={it.name}>
-          <span className={styles.itemFileSpinner}>{'\uf110'}</span>
-          <span className={styles.itemFileName}>{it.name}</span>
-        </li>)
-      }</ul>
-    }
+
+    {isRunning && !isQueued && p && total > 0 && <ProgressBar className={styles.itemProgress} current={current} total={total}/>}
+
+    {subtitle && <p className={styles.itemSubtitle} title={subtitle}>{subtitle}</p>}
+
     {
       task.waiting.length > 0 &&
       <p className={styles.itemWaiting}>{getLocale('task-waiting', task.waiting.length)}</p>
     }
+
     {
-      task.errors.map((err, k) => <p key={'err-' + k} className={styles.itemError} title={getLocale(String(err.message).split(' : ')[0])}>
-        {getLocale('task-failed', itemTitle(err.task, getLocale))}
-      </p>)
+      hasError &&
+      <ul className={styles.itemErrors}>{
+        task.errors.map((err, k) => {
+          const line = errorLine(err)
+          return <li key={'err-' + k} className={styles.itemErrorLine} title={line}>{line}</li>
+        })
+      }</ul>
     }
   </li>
 }
-
-const itemTitle = (task, getLocale) => task ? getLocale(task) : ''
 
 export default TaskBarItem

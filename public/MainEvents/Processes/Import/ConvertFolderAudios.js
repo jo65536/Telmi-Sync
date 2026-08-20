@@ -57,7 +57,7 @@ function convertFolderAudios (folderPath) {
     try {
       convertMusic(file, {
         emitProgress: false,
-        tmpDir: 'music-' + slot,
+        tmpDir: 'music-' + process.pid + '-' + slot,
         claimedDst,
         onDone: () => { finishOne(file, false); callback() },
         onError: () => { finishOne(file, true); callback() }

@@ -6,6 +6,11 @@ const {ipcRenderer} = window.require('electron')
 
 // Time a finished (successful) task stays visible before it auto-clears.
 const DONE_LINGER_MS = 4000
+// Cap kept notifications so a burst of warnings can't grow without bound.
+const MAX_NOTIFICATIONS = 60
+// Cap finished per-file import rows so a huge batch (hundreds) stays legible;
+// running/queued/errored rows are always kept.
+const MAX_FILE_DONE = 80
 
 const itemLabel = (item) => typeof item === 'string' ? item : (item && item.title) || ''
 
@@ -13,6 +18,7 @@ function TaskManagerProvider ({children}) {
   const
     [tasks, setTasks] = useState({}),
     doneTimers = useRef({}),
+    notifSeq = useRef(0),
 
     upsert = useCallback(
       (name, patch) => setTasks((tasks) => {
@@ -47,17 +53,56 @@ function TaskManagerProvider ({children}) {
       })
     }, [setTasks, clearDoneTimer]),
 
+    // "Clear finished": drop everything that is not actively running (done,
+    // errored, and one-shot notifications), keeping only live work.
+    clearFinished = useCallback(() => {
+      setTasks((tasks) => {
+        const next = {}
+        for (const [name, t] of Object.entries(tasks)) {
+          if (t.status === 'running' || t.status === 'cancelling') {
+            next[name] = t
+          } else {
+            clearDoneTimer(name)
+          }
+        }
+        return next
+      })
+    }, [setTasks, clearDoneTimer]),
+
+    // A one-shot warning (e.g. a failed conversion) shown as a persistent,
+    // dismissible entry in the task list instead of a blocking modal.
+    addNotification = useCallback((title, message) => {
+      const key = 'notification-' + (notifSeq.current += 1)
+      setTasks((tasks) => {
+        const next = {...tasks, [key]: {
+          name: key,
+          label: title || 'error',
+          cancellable: false,
+          notification: true,
+          processing: null,
+          waiting: [],
+          items: [],
+          errors: [{task: title, message}],
+          status: 'error'
+        }}
+        // Keep only the most recent notifications.
+        const notifs = Object.keys(next).filter((k) => next[k].notification)
+        if (notifs.length > MAX_NOTIFICATIONS) {
+          notifs
+            .sort((a, b) => Number(a.split('-')[1]) - Number(b.split('-')[1]))
+            .slice(0, notifs.length - MAX_NOTIFICATIONS)
+            .forEach((k) => { delete next[k] })
+        }
+        return next
+      })
+    }, [setTasks]),
+
     startTask = useCallback((name, dataSent, opts) => {
       clearDoneTimer(name)
       const conf = TASK_BY_NAME[name] || {}
       setTasks((tasks) => {
         const
           existing = tasks[name],
-          // Re-triggering a task that is still running (e.g. dropping more
-          // files while an import runs, which the main process appends to its
-          // queue) must not wipe the errors/items/progress already reported —
-          // the main process never re-emits them. A genuinely fresh start
-          // (no running entry) gets a clean slate.
           isRunning = existing !== undefined && (existing.status === 'running' || existing.status === 'cancelling' || existing.status === 'error'),
           base = existing || {name, processing: null, waiting: [], items: [], errors: []}
         return {...tasks, [name]: {
@@ -74,9 +119,19 @@ function TaskManagerProvider ({children}) {
     }, [setTasks, clearDoneTimer]),
 
     cancelTask = useCallback((name) => {
-      ipcRenderer.send(name + '-cancel')
+      if (name.startsWith('file-')) {
+        ipcRenderer.send('import-file-cancel', Number(name.slice(5)))
+      } else {
+        ipcRenderer.send(name + '-cancel')
+      }
       upsert(name, {status: 'cancelling'})
-    }, [upsert])
+    }, [upsert]),
+
+    // Trigger an import without creating an aggregate task: each dropped file
+    // gets its own row via the 'import-file' events below.
+    importFiles = useCallback((filesPath) => {
+      ipcRenderer.send('import', filesPath)
+    }, [])
 
   // One set of listeners per known task channel, attached once.
   useEffect(() => {
@@ -84,8 +139,6 @@ function TaskManagerProvider ({children}) {
     TASK_REGISTRY.forEach(({name}) => {
       const onTask = (e, title, message, current, total) => {
         if (title === '' && message === '' && current === 0 && total === 0) {
-          // Completion sentinel. Keep it briefly if it succeeded; if it holds
-          // errors, leave it until the user dismisses it.
           setTasks((tasks) => {
             const t = tasks[name]
             if (t === undefined) {
@@ -142,6 +195,57 @@ function TaskManagerProvider ({children}) {
     return () => offs.forEach((off) => off())
   }, [upsert, dismissTask, clearDoneTimer])
 
+  // Global warning channel -> non-blocking list entries (no modal).
+  useEffect(() => {
+    const listener = (e, payload) => {
+      addNotification((payload && payload.title) || 'error', (payload && payload.message) || '')
+    }
+    ipcRenderer.on('error-warning', listener)
+    return () => ipcRenderer.off('error-warning', listener)
+  }, [addNotification])
+
+  // Per-file import rows: one entry per dropped file (queued -> converting ->
+  // done / error), so dropping 40 files shows 40 rows in the task bar.
+  useEffect(() => {
+    const onFile = (e, f) => {
+      const key = 'file-' + f.id
+      setTasks((tasks) => {
+        if (f.status === 'cancelled') {
+          const next = {...tasks}
+          delete next[key]
+          return next
+        }
+        const base = tasks[key] || {
+          name: key, label: f.name, cancellable: true, fileTask: true, fileId: f.id,
+          queued: false, processing: null, waiting: [], items: [], errors: [], status: 'running'
+        }
+        let patch
+        if (f.status === 'queued') {
+          patch = {status: 'running', queued: true, processing: null}
+        } else if (f.status === 'converting') {
+          patch = {status: 'running', queued: false, processing: {title: '', message: 'task-import', current: f.current, total: f.total}}
+        } else if (f.status === 'done') {
+          patch = {status: 'done', queued: false, processing: null}
+        } else if (f.status === 'error') {
+          patch = {status: 'error', queued: false, processing: null, errors: [{task: f.name, message: f.error}]}
+        } else {
+          patch = {}
+        }
+        const next = {...tasks, [key]: {...base, label: f.name || base.label, ...patch}}
+        const doneKeys = Object.keys(next).filter((k) => next[k].fileTask && next[k].status === 'done')
+        if (doneKeys.length > MAX_FILE_DONE) {
+          doneKeys
+            .sort((a, b) => next[a].fileId - next[b].fileId)
+            .slice(0, doneKeys.length - MAX_FILE_DONE)
+            .forEach((k) => { delete next[k] })
+        }
+        return next
+      })
+    }
+    ipcRenderer.on('import-file', onFile)
+    return () => ipcRenderer.off('import-file', onFile)
+  }, [setTasks])
+
   useEffect(() => {
     const timers = doneTimers.current
     return () => Object.values(timers).forEach(clearTimeout)
@@ -151,8 +255,11 @@ function TaskManagerProvider ({children}) {
     tasks: Object.values(tasks),
     startTask,
     cancelTask,
-    dismissTask
-  }), [tasks, startTask, cancelTask, dismissTask])
+    dismissTask,
+    clearFinished,
+    addNotification,
+    importFiles
+  }), [tasks, startTask, cancelTask, dismissTask, clearFinished, addNotification, importFiles])
 
   return <TaskManagerContext.Provider value={value}>{children}</TaskManagerContext.Provider>
 }
