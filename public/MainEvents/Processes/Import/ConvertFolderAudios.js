@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import convertMusic from './ConvertMusic.js'
 import { isAudioFile } from './Helpers/AudioFile.js'
+import { runConcurrentPool } from '../Helpers/ConcurrencyPool.js'
 
 const collectAudioFiles = (dir) => {
   let out = []
@@ -16,9 +17,10 @@ const collectAudioFiles = (dir) => {
   return out
 }
 
-// Recursively imports every audio file found anywhere under `folderPath` as
-// music. Used when a dropped folder is not a recognized story pack — so a
-// parent folder of albums/subfolders imports all its tracks at once.
+// Recursively imports every audio file under `folderPath` as music, running
+// several conversions in parallel (one per CPU slot). Each pool slot gets its
+// own tmp directory so parallel conversions never clobber each other's
+// scratch files.
 function convertFolderAudios (folderPath) {
   const files = collectAudioFiles(folderPath).sort((a, b) => a.localeCompare(b))
 
@@ -27,26 +29,31 @@ function convertFolderAudios (folderPath) {
     return
   }
 
-  let index = 0
-  const next = () => {
-    if (index >= files.length) {
-      process.stdout.write('success')
-      return
+  const total = files.length
+  let done = 0
+
+  const finishOne = (file, isError) => {
+    done += 1
+    if (isError) {
+      process.stdout.write('*error-warning*music-conversion-failed*' + path.basename(file) + '*')
     }
-    const file = files[index]
-    process.stdout.write('*importing-audio*' + (index + 1) + '*' + files.length + '*')
-    index += 1
-    // One bad file must not abort the whole batch: report a warning and go on.
+    process.stdout.write('*importing-audio*' + done + '*' + total + '*')
+  }
+
+  runConcurrentPool((callback, slot) => {
+    if (!files.length) {
+      return false
+    }
+    const file = files.shift()
+    // One bad file must not abort the batch: report a warning and continue.
     convertMusic(file, {
       emitProgress: false,
-      onDone: next,
-      onError: () => {
-        process.stdout.write('*error-warning*music-conversion-failed*' + path.basename(file) + '*')
-        next()
-      }
+      tmpDir: 'music-' + slot,
+      onDone: () => { finishOne(file, false); callback() },
+      onError: () => { finishOne(file, true); callback() }
     })
-  }
-  next()
+    return true
+  }).then(() => process.stdout.write('success'))
 }
 
 export default convertFolderAudios

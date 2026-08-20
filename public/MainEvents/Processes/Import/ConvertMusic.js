@@ -11,6 +11,7 @@ import { musicObjectToName } from '../../Helpers/Music.js'
 function convertMusic (srcPath, opts = {}) {
   const
     emitProgress = opts.emitProgress !== false,
+    tmpDirName = opts.tmpDir || 'music',
     onDone = opts.onDone || (() => process.stdout.write('success')),
     onError = opts.onError || ((e) => process.stderr.write('music-conversion-failed' + (e instanceof Error && e.message !== '' ? ' : ' + e.message : ''))),
     progress = (msg, cur, total) => { if (emitProgress) process.stdout.write('*' + msg + '*' + cur + '*' + total + '*') }
@@ -18,7 +19,7 @@ function convertMusic (srcPath, opts = {}) {
   progress('music-extracting-metadata', 0, 3)
 
   const
-    tmpPath = initTmpPath('music'),
+    tmpPath = initTmpPath(tmpDirName),
     tmpMetadataTxtPath = path.join(tmpPath, 'metadata.txt'),
     metadata = {
       artist: 'unknow',

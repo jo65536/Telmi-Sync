@@ -11,7 +11,7 @@ const
       const runningPool = new Array(concurrency).fill(true)
 
       const runNext = (idCPU) => {
-        runningPool[idCPU] = worker(() => runNext(idCPU))
+        runningPool[idCPU] = worker(() => runNext(idCPU), idCPU)
         if (!runningPool[idCPU] && runningPool.indexOf(true) === -1) {
           resolve()
         }
@@ -23,4 +23,4 @@ const
     })
   }
 
-export {runConcurrentPool}
+export {runConcurrentPool, concurrency}
