@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import runProcess from '../Processes/RunProcess.js'
-import {rmFile} from './Files.js'
 
 const
   readMusic = (musicsPath) => {
@@ -20,7 +19,8 @@ const
             imagePath = path.join(musicsPath, name + '.png')
 
           if (!fs.existsSync(imagePath)) {
-            rmFile(musicPath)
+            // Non-destructive: the cover png may simply not be written yet
+            // (mid-import). Skip for now; the next refresh will pick it up.
             return acc
           }
 

@@ -20,7 +20,8 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       } catch (e) {
         console.log('telmios-stories-get : ' + e.toString())
       }
-      list.error.forEach((d) => mainWindow.webContents.send('error-warning', {title: 'story-corrupted', message: 'External drive : ' + telmiDevice.drive + ' | Story : ' + d}))
+      // Don't raise a warning per unreadable story (mid-write during a sync
+      // still shows as unreadable) — it only spams the UI. Publish the readable ones.
       mainWindow.webContents.send('telmios-stories-data', list.stories)
     }
   )

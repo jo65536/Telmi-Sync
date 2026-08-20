@@ -128,7 +128,7 @@ function convertFolderAudioList(srcPath, storyName) {
         path.join(dstPath, 'title.png'),
         ...storiesTxt.map((f, k) => path.join(dstPathImages, 'm' + k + '.png'))
       ],
-      ttsTmpPath = initTmpPath('pipertts'),
+      ttsTmpPath = initTmpPath('pipertts/' + process.pid),
       ttsJsonPath = path.join(ttsTmpPath, 'tts.json'),
       ttsTxt = [
         title,

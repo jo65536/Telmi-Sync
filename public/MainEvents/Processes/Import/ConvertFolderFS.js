@@ -168,7 +168,7 @@ function convertFolderFS (srcPath, storyName) {
   fs.writeFileSync(path.join(dstPath, 'metadata.json'), JSON.stringify(metadata))
 
   const
-    tmpPath = initTmpPath('story'),
+    tmpPath = initTmpPath('story/' + process.pid),
 
     toSrcPathsArray = (arr, srcPath) => {
       return arr.map((v) => {

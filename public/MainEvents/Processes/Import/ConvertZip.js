@@ -107,7 +107,11 @@ function convertZip(zipPath) {
 
       const
         zipFilename = path.parse(zipPath).name,
-        tmpPath = storyDir === null ? initTmpPath(path.join('story-zip', stringSlugify(zipFilename))) : initTmpPath('story-zip'),
+        // Unique tmp per import: initTmpPath() wipes the exact dir it returns, so
+        // several imports running in parallel must never share 'story-zip' (the
+        // old subdir branch did, and would wipe a sibling import mid-extract).
+        // The pid keeps two archives with the same basename from colliding too.
+        tmpPath = initTmpPath(path.join('story-zip', stringSlugify(zipFilename) + '-' + process.pid)),
         extractPath = storyDir === null ? tmpPath : path.join(tmpPath, storyDir)
 
       unpack(

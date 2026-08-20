@@ -6,7 +6,6 @@ import LocalMusicProvider from './Components/LocalMusic/LocalMusicProvider.js'
 import LocaleProvider from './Components/Locale/LocaleProvider.js'
 import TelmiOSProvider from './Components/TelmiOS/TelmiOSProvider.js'
 import TelmiSyncParamsProvider from './Components/TelmiSyncParams/TelmiSyncParamsProvider.js'
-import ErrorListener from './Components/ErrorListener/ErrorListener.js'
 import TaskManagerProvider from './Components/TaskManager/TaskManagerProvider.js'
 import TaskBar from './Components/TaskManager/TaskBar.js'
 
@@ -24,7 +23,6 @@ function App() {
             </LocalMusicProvider>
           </LocalStoriesProvider>
         </TelmiOSProvider>
-        <ErrorListener/>
       </ModalProvider>
       <TaskBar/>
       </TaskManagerProvider>

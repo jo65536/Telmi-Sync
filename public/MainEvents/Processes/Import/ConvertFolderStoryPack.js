@@ -123,7 +123,7 @@ const
     const
       txtToWav = srcTxt.reduce((acc, txt) => ({...acc, [txt]: txt.substring(0, txt.length - 4) + '.wav'}), {}),
       params = getTelmiSyncParams(),
-      jsonPath = path.join(initTmpPath('json'), 'tts.json'),
+      jsonPath = path.join(initTmpPath('json/' + process.pid), 'tts.json'),
       jsonContent = srcTxt.map((txt) => JSON.stringify({
         'text': fs.readFileSync(txt).toString('utf-8'),
         'output_file': txtToWav[txt]

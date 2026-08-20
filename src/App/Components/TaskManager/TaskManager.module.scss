@@ -9,159 +9,202 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  pointer-events: none;
 }
 
+/* ---- thin bottom bar ---- */
 .bar {
+  pointer-events: auto;
   -webkit-app-region: no-drag;
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  height: 40px;
-  padding: 0 16px;
-  background: rgba(245, 245, 247, 0.96);
+  gap: 10px;
+  height: 34px;
+  padding: 0 14px;
+  border: none;
   border-top: 1px solid $separator;
+  background: rgba(246, 246, 248, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12.5px;
   color: $textPrimary;
+  transition: background .15s ease;
+
+  &:hover { background: rgba(238, 238, 241, 0.96); }
 }
 
 .barError {
-  background: rgba(255, 59, 48, 0.10);
+  border-top-color: rgba(255, 59, 48, 0.5);
+  background: rgba(255, 59, 48, 0.07);
+  &:hover { background: rgba(255, 59, 48, 0.11); }
 }
 
-.barChevron {
-  font-family: icons;
-  font-weight: bold;
-  font-size: 11px;
-  color: $textSecondary;
+.barDot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: $textSecondary;
 }
+.barBusy .barDot {
+  background: $accent;
+  animation: taskPulse 1.2s ease-in-out infinite;
+}
+.barError .barDot { background: $danger; animation: none; }
 
 .barSummary {
   flex: 0 0 auto;
   white-space: nowrap;
+  font-weight: 500;
 }
 
-.barProgress {
-  flex: 1 1 auto;
+.barProgress { flex: 1 1 auto; }
+.barSpacer { flex: 1 1 auto; }
+
+.barChevron {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: $textSecondary;
 }
 
+/* ---- expanded panel (grows upward, above the bar) ---- */
 .panel {
-  max-height: 42vh;
-  overflow-y: auto;
-  background: $surfacePanel;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  max-height: 44vh;
+  background: rgba(250, 250, 252, 0.98);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-top: 1px solid $separator;
-  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.12);
 }
 
-.item {
-  padding: 10px 16px;
+.panelHead {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 14px;
   border-bottom: 1px solid $separator;
+}
+.panelTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $textSecondary;
+}
+.panelClear {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  font-size: 12px;
+  color: $accent;
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.panelList {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- one task / notification row ---- */
+.item {
+  padding: 9px 14px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  &:last-child { border-bottom: none; }
+}
+
+.itemErr {
+  box-shadow: inset 2px 0 0 $danger;
 }
 
 .itemHead {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
+  gap: 9px;
+}
+
+.itemGlyph {
+  flex: 0 0 auto;
+  width: 14px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1;
+}
+.glyphOk { color: $success; }
+.glyphErr { color: $danger; }
+.glyphQueued { color: $textSecondary; opacity: 0.55; }
+.glyphSpin {
+  color: $accent;
+  display: inline-block;
+  animation: taskSpin 0.9s linear infinite;
 }
 
 .itemLabel {
   flex: 1 1 auto;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: $textPrimary;
 }
 
-.itemStatus {
+.itemCount {
   flex: 0 0 auto;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
   color: $textSecondary;
 }
 
 .itemAction {
   flex: 0 0 auto;
-  font-size: 14px;
+  font-size: 13px;
   padding: 2px 4px;
   color: $textSecondary;
 }
 
-.iconDone {
-  font-family: icons;
-  font-weight: bold;
-  color: $success;
-  margin-right: 4px;
-}
-
-.iconError {
-  font-family: icons;
-  font-weight: bold;
-  color: $danger;
-  margin-right: 4px;
-}
-
-.itemProgress {
-  margin: 6px 0;
-}
+.itemProgress { margin: 7px 0 2px 23px; }
 
 .itemSubtitle {
+  margin: 3px 0 0 23px;
   font-size: 12px;
   color: $textSecondary;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.itemSubtitleError {
-  color: $danger;
 }
 
 .itemWaiting {
+  margin: 3px 0 0 23px;
   font-size: 12px;
   color: $textSecondary;
-  margin-top: 2px;
 }
 
-.itemError {
-  font-size: 12px;
-  color: $danger;
-  margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.itemFiles {
-  margin: 6px 0 2px 0;
+/* ---- error lines: their own scroll so one noisy task can't take over ---- */
+.itemErrors {
+  margin: 6px 0 0 23px;
+  padding: 0;
+  list-style: none;
   display: flex;
   flex-direction: column;
   gap: 2px;
+  max-height: 22vh;
+  overflow-y: auto;
 }
-
-.itemFile {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
+.itemErrorLine {
   font-size: 12px;
-  color: $textSecondary;
+  color: $danger;
   white-space: nowrap;
-  overflow: hidden;
-}
-
-.itemFileSpinner {
-  flex: 0 0 auto;
-  font-family: icons;
-  font-weight: bold;
-  font-size: 11px;
-  color: $accent;
-  animation: taskSpin 1s linear infinite;
-}
-
-.itemFileName {
-  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -169,4 +212,8 @@
 @keyframes taskSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+@keyframes taskPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
 }

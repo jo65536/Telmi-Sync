@@ -31,7 +31,7 @@ function main (srcPath) {
       case '.m4a':
       case '.wma':
       case '.webm':
-        convertMusic(srcPath)
+        convertMusic(srcPath, {tmpDir: 'music-' + process.pid})
         break
       default:
         process.stderr.write('file-ext-not-supported')
