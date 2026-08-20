@@ -9,8 +9,8 @@ const TASK_REGISTRY = [
   {name: 'stories-transfer', label: 'task-stories-transfer', cancellable: true},
   {name: 'store-download', label: 'task-store-download', cancellable: true},
   {name: 'store-build', label: 'task-store-build', cancellable: true},
-  {name: 'stories-optimize-audio', label: 'task-stories-optimize', cancellable: false},
-  {name: 'local-stories-merge', label: 'task-stories-merge', cancellable: false},
+  {name: 'stories-optimize-audio', label: 'task-stories-optimize', cancellable: true},
+  {name: 'local-stories-merge', label: 'task-stories-merge', cancellable: true},
   {name: 'telmios-eject', label: 'task-telmios-eject', cancellable: false},
   {name: 'telmios-cardmaker', label: 'task-telmios-cardmaker', cancellable: false},
   {name: 'telmios-update', label: 'task-telmios-update', cancellable: false}

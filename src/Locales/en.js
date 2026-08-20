@@ -313,6 +313,8 @@ const en = {
   'task-telmios-eject': 'Ejecting the card',
   'task-telmios-cardmaker': 'Creating the Telmi card',
   'task-telmios-update': 'Updating TelmiOS',
+  'importing-audio': 'Importing audio files',
+  'no-audio-found': 'No audio file found in this folder',
   'add-files': 'Add files',
   'view-list': 'View as list',
   'view-grid': 'View as grid',
