@@ -30,13 +30,18 @@ function convertFolderAudios (folderPath) {
   }
 
   const total = files.length
+  const claimedDst = new Set()
   let done = 0
+
+  // '*' is illegal in the stdout frame protocol; strip it from names.
+  const itemName = (file) => path.basename(file).replace(/\*/g, '')
 
   const finishOne = (file, isError) => {
     done += 1
     if (isError) {
-      process.stdout.write('*error-warning*music-conversion-failed*' + path.basename(file) + '*')
+      process.stdout.write('*error-warning*music-conversion-failed*' + itemName(file) + '*')
     }
+    process.stdout.write('*task-item*' + (isError ? 'error' : 'done') + '*' + itemName(file) + '*')
     process.stdout.write('*importing-audio*' + done + '*' + total + '*')
   }
 
@@ -45,13 +50,22 @@ function convertFolderAudios (folderPath) {
       return false
     }
     const file = files.shift()
-    // One bad file must not abort the batch: report a warning and continue.
-    convertMusic(file, {
-      emitProgress: false,
-      tmpDir: 'music-' + slot,
-      onDone: () => { finishOne(file, false); callback() },
-      onError: () => { finishOne(file, true); callback() }
-    })
+    process.stdout.write('*task-item*converting*' + itemName(file) + '*')
+    // One bad file must not abort the batch: report a warning and continue,
+    // even if convertMusic throws synchronously (which would otherwise leave
+    // this pool slot idle and the batch never finishing).
+    try {
+      convertMusic(file, {
+        emitProgress: false,
+        tmpDir: 'music-' + slot,
+        claimedDst,
+        onDone: () => { finishOne(file, false); callback() },
+        onError: () => { finishOne(file, true); callback() }
+      })
+    } catch (e) {
+      finishOne(file, true)
+      callback()
+    }
     return true
   }).then(() => process.stdout.write('success'))
 }

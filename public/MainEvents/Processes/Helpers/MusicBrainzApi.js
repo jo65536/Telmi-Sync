@@ -1,7 +1,20 @@
 import { downloadFile, requestJson } from '../../Helpers/Request.js'
 import * as path from 'path'
 
-const getMusicBrainzCoverImage = async (artist, album, dirPath) => {
+// MusicBrainz asks for at most ~1 request/second per client. Audio conversion
+// runs in parallel, so cover lookups are funnelled through a single serialized
+// queue with >=1.1s spacing to stay within the policy (and avoid 503s / an IP
+// ban) while keeping conversions concurrent.
+let mbGate = Promise.resolve()
+const throttleMusicBrainz = (task) => {
+  const result = mbGate.then(task)
+  mbGate = result.then(() => {}, () => {}).then(() => new Promise((r) => setTimeout(r, 1100)))
+  return result
+}
+
+const getMusicBrainzCoverImage = (artist, album, dirPath) => throttleMusicBrainz(() => fetchMusicBrainzCoverImage(artist, album, dirPath))
+
+const fetchMusicBrainzCoverImage = async (artist, album, dirPath) => {
   try {
     const
       requestVars = [...artist.split(/[ -]+/), ...album.split(/[ -]+/)]

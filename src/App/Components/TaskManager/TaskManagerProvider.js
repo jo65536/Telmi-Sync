@@ -22,6 +22,7 @@ function TaskManagerProvider ({children}) {
           cancellable: !!(TASK_BY_NAME[name] || {}).cancellable,
           processing: null,
           waiting: [],
+          items: [],
           errors: [],
           status: 'running'
         }
@@ -54,6 +55,7 @@ function TaskManagerProvider ({children}) {
         cancellable: (opts && opts.cancellable !== undefined) ? opts.cancellable : !!conf.cancellable,
         status: 'running',
         errors: [],
+        items: [],
         processing: {title: '', message: 'initialize', current: 0, total: 1}
       })
       ipcRenderer.send(name, ...(Array.isArray(dataSent) ? dataSent : []))
@@ -82,7 +84,7 @@ function TaskManagerProvider ({children}) {
             }
             clearDoneTimer(name)
             doneTimers.current[name] = setTimeout(() => dismissTask(name), DONE_LINGER_MS)
-            return {...tasks, [name]: {...t, processing: null, waiting: [], status: 'done'}}
+            return {...tasks, [name]: {...t, processing: null, waiting: [], items: [], status: 'done'}}
           })
         } else {
           upsert(name, {processing: {title, message, current, total}, status: 'running'})
@@ -91,12 +93,25 @@ function TaskManagerProvider ({children}) {
       const onWaiting = (e, waiting) => {
         upsert(name, {waiting: Array.isArray(waiting) ? waiting.map(itemLabel) : []})
       }
+      const onItem = (e, status, itemName) => {
+        setTasks((tasks) => {
+          const t = tasks[name]
+          if (t === undefined) {
+            return tasks
+          }
+          const items = (t.items || []).filter((it) => it.name !== itemName)
+          if (status === 'converting') {
+            items.push({name: itemName, status})
+          }
+          return {...tasks, [name]: {...t, items}}
+        })
+      }
       const onError = (e, title, error) => {
         setTasks((tasks) => {
           const t = tasks[name] || {
             name, label: (TASK_BY_NAME[name] || {}).label || name,
             cancellable: !!(TASK_BY_NAME[name] || {}).cancellable,
-            processing: null, waiting: [], errors: [], status: 'running'
+            processing: null, waiting: [], items: [], errors: [], status: 'running'
           }
           return {...tasks, [name]: {...t, errors: [...t.errors, {task: title, message: error}], status: 'error'}}
         })
@@ -104,10 +119,12 @@ function TaskManagerProvider ({children}) {
       ipcRenderer.on(name + '-task', onTask)
       ipcRenderer.on(name + '-waiting', onWaiting)
       ipcRenderer.on(name + '-error', onError)
+      ipcRenderer.on(name + '-item', onItem)
       offs.push(() => {
         ipcRenderer.off(name + '-task', onTask)
         ipcRenderer.off(name + '-waiting', onWaiting)
         ipcRenderer.off(name + '-error', onError)
+        ipcRenderer.off(name + '-item', onItem)
       })
     })
     return () => offs.forEach((off) => off())

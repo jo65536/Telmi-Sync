@@ -67,9 +67,16 @@ function convertMusic (srcPath, opts = {}) {
 
       progress('converting-audio', 1, 3)
 
-      if(fs.existsSync(musicDstPath)) {
+      // Under parallel import several slots run in this same process, so a
+      // shared claim set makes "is this output already being produced?"
+      // atomic (single-threaded JS between check and add) — avoiding two slots
+      // writing the same destination mp3 concurrently.
+      if (fs.existsSync(musicDstPath) || (opts.claimedDst && opts.claimedDst.has(musicDstPath))) {
         onDone()
         return
+      }
+      if (opts.claimedDst) {
+        opts.claimedDst.add(musicDstPath)
       }
 
       convertAudio(srcPath, musicDstPath, true, true)

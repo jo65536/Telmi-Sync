@@ -5,7 +5,7 @@ import {getElectronAppPath} from '../Helpers/AppPaths.js'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 
-function runProcess(mainWindow, jsFile, arrayParams, onSuccess, onProgress, onError, onFinished) {
+function runProcess(mainWindow, jsFile, arrayParams, onSuccess, onProgress, onError, onFinished, onItem) {
   const
     taskProcess = utilityProcess.fork(
       path.join(__dirname, jsFile),
@@ -50,6 +50,12 @@ function runProcess(mainWindow, jsFile, arrayParams, onSuccess, onProgress, onEr
 
       if (message === 'error-warning') {
         mainWindow.webContents.send('error-warning', {title: current, message: total})
+      } else if (message === 'task-item') {
+        // Per-item detail (e.g. one line per music being converted); current is
+        // the status (converting/done/error), total is the item name.
+        if (typeof onItem === 'function') {
+          onItem(current, total)
+        }
       } else {
         onProgress(message, current, total)
       }

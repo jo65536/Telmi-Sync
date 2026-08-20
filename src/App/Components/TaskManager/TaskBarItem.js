@@ -32,6 +32,15 @@ function TaskBarItem ({task, onCancel, onDismiss}) {
     {p && <ProgressBar className={styles.itemProgress} current={current} total={total}/>}
     <p className={[styles.itemSubtitle, hasError ? styles.itemSubtitleError : ''].join(' ')} title={subtitle}>{subtitle}</p>
     {
+      (task.items || []).length > 0 &&
+      <ul className={styles.itemFiles}>{
+        task.items.map((it, k) => <li key={'file-' + k} className={styles.itemFile} title={it.name}>
+          <span className={styles.itemFileSpinner}>{'\uf110'}</span>
+          <span className={styles.itemFileName}>{it.name}</span>
+        </li>)
+      }</ul>
+    }
+    {
       task.waiting.length > 0 &&
       <p className={styles.itemWaiting}>{getLocale('task-waiting', task.waiting.length)}</p>
     }

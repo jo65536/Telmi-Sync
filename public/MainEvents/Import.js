@@ -30,7 +30,10 @@ function mainEventImport(mainWindow) {
       (error) => {
         mainWindow.webContents.send('import-error', file, error)
       },
-      () => runImport()
+      () => runImport(),
+      (status, name) => {
+        mainWindow.webContents.send('import-item', status, name)
+      }
     )
   }
 

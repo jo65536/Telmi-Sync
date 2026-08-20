@@ -132,3 +132,41 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.itemFiles {
+  margin: 6px 0 2px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.itemFile {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: $textSecondary;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.itemFileSpinner {
+  flex: 0 0 auto;
+  font-family: icons;
+  font-weight: bold;
+  font-size: 11px;
+  color: $accent;
+  animation: taskSpin 1s linear infinite;
+}
+
+.itemFileName {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes taskSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
