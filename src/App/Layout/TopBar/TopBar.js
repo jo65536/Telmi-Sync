@@ -4,13 +4,11 @@ import {useModal} from '../../Components/Modal/ModalHooks.js'
 
 import {routeSynchronize} from '../../Modules/Synchronize/Routes.js'
 import {routeStores} from '../../Modules/Stores/Routes.js'
-import {routeStudio} from '../../Modules/Studio/Routes.js'
 import {routeRSSFeed} from '../../Modules/RSSFeed/Routes.js'
 
 import ButtonIconTextArrowLeftRight from '../../Components/Buttons/IconsTexts/ButtonIconTextArrowLeftRight.js'
 import ButtonIconTextStore from '../../Components/Buttons/IconsTexts/ButtonIconTextStore.js'
 import ButtonIconTextRSSFeed from '../../Components/Buttons/IconsTexts/ButtonIconTextRSSFeed.js'
-import ButtonIconTextMicrophone from '../../Components/Buttons/IconsTexts/ButtonIconTextMicrophone.js'
 import ButtonIconGear from '../../Components/Buttons/Icons/ButtonIconGear.js'
 import TopButtonNavigation from './TopButtonNavigation.js'
 import ButtonLangChooser from '../../Components/Locale/ButtonLangChooser.js'
@@ -53,11 +51,6 @@ function TopBar({currentModule}) {
                              text={getLocale('podcasts')}
                              route={routeRSSFeed}
                              currentModule={currentModule}/>
-        {currentModule === routeStudio.module && <TopButtonNavigation buttonComponent={ButtonIconTextMicrophone}
-                                                                      text={getLocale('studio')}
-                                                                      route={routeStudio}
-                                                                      currentModule={currentModule}
-                                                                      clickable={false}/>}
       </ul>
     </div>
     <ul className={styles.buttons}>

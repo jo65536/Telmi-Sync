@@ -32,8 +32,6 @@ function TableGroup({
                       selectedData,
                       onSelect,
                       onSelectAll,
-                      onPlay,
-                      onStudio,
                       onInfo,
                       onEdit,
                       onOptimizeAudio,
@@ -105,8 +103,6 @@ function TableGroup({
                                      data={v}
                                      selected={isCellSelected(selectedData, v)}
                                      onSelect={onSelect}
-                                     onPlay={onPlay}
-                                     onStudio={onStudio}
                                      onInfo={onInfo}
                                      onOptimizeAudio={onOptimizeAudio}
                                      onEdit={onEdit}

@@ -16,7 +16,6 @@ import ButtonIconSquareCheck from '../Buttons/Icons/ButtonIconSquareCheck.js'
 import ButtonIconDownload from '../Buttons/Icons/ButtonIconDownload.js'
 import ButtonIconPen from '../Buttons/Icons/ButtonIconPen.js'
 import ButtonIconWave from '../Buttons/Icons/ButtonIconWave.js'
-import ButtonIconPlus from '../Buttons/Icons/ButtonIconPlus.js'
 import ButtonIconXMark from '../Buttons/Icons/ButtonIconXMark.js'
 import ButtonIconListView from '../Buttons/Icons/ButtonIconListView.js'
 import ButtonIconGridView from '../Buttons/Icons/ButtonIconGridView.js'
@@ -34,10 +33,7 @@ function Table({
                  selectedData,
                  onSelect,
                  onSelectAll,
-                 onPlay,
-                 onStudio,
                  onInfo,
-                 onAdd,
                  onEdit,
                  onEditSelected,
                  onOptimizeAudio,
@@ -316,7 +312,7 @@ function Table({
       <h2 className={styles.headerTitleLeft}>{titleLeft}</h2>
       {titleRight && <p className={styles.headerTitleRight}>{titleRight}</p>}
       {
-        (onAdd || onSelectAll || onDeleteSelected || onDownloadSelected || onEditSelected || onOptimizeAudioSelected || additionalHeaderButtons) &&
+        (onSelectAll || onDeleteSelected || onDownloadSelected || onEditSelected || onOptimizeAudioSelected || additionalHeaderButtons) &&
         <ul className={styles.headerIcons}>
           {
             onOptimizeAudioSelected && selectedData.length > 0 &&
@@ -347,12 +343,6 @@ function Table({
             <TableHeaderIcon componentIcon={ButtonIconSquareCheck}
                              title="select-all"
                              onClick={onSelectAllCallback}/>
-          }
-          {
-            onAdd &&
-            <TableHeaderIcon componentIcon={ButtonIconPlus}
-                             title="story-create"
-                             onClick={onAdd}/>
           }
           {additionalHeaderButtons || null}
         </ul>
@@ -406,8 +396,6 @@ function Table({
                                                    columns={columns}
                                                    selected={isCellSelected(selectedData, v)}
                                                    onSelect={onListSelect}
-                                                   onPlay={onPlay}
-                                                   onStudio={onStudio}
                                                    onOptimizeAudio={onOptimizeAudio}
                                                    onEdit={onEdit}
                                                    onInfo={onInfo}
@@ -426,8 +414,6 @@ function Table({
                                  selectedData={selectedData}
                                  onSelect={onCellSelect}
                                  onSelectAll={onSelectAll}
-                                 onPlay={onPlay}
-                                 onStudio={onStudio}
                                  onOptimizeAudio={onOptimizeAudio}
                                  onEdit={onEdit}
                                  onInfo={onInfo}
@@ -438,8 +424,6 @@ function Table({
                                 data={v}
                                 selected={isCellSelected(selectedData, v)}
                                 onSelect={onCellSelect}
-                                onPlay={onPlay}
-                                onStudio={onStudio}
                                 onOptimizeAudio={onOptimizeAudio}
                                 onEdit={onEdit}
                                 onInfo={onInfo}

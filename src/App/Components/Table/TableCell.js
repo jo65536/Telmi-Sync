@@ -6,12 +6,10 @@ import ButtonIconWave from '../Buttons/Icons/ButtonIconWave.js'
 import ButtonIconPen from '../Buttons/Icons/ButtonIconPen.js'
 import ButtonIconDownload from '../Buttons/Icons/ButtonIconDownload.js'
 import ButtonIconInfo from '../Buttons/Icons/ButtonIconInfo.js'
-import ButtonIconPlay from '../Buttons/Icons/ButtonIconPlay.js'
-import ButtonIconMicrophone from '../Buttons/Icons/ButtonIconMicrophone.js'
 
 import styles from './Table.module.scss'
 
-function TableCell ({data, selected, onSelect, onPlay, onStudio, onInfo, onOptimizeAudio, onEdit, onDownload, onDelete}) {
+function TableCell ({data, selected, onSelect, onInfo, onOptimizeAudio, onEdit, onDownload, onDelete}) {
   const
     {getLocale} = useLocale(),
     onCSelect = useCallback(
@@ -25,22 +23,6 @@ function TableCell ({data, selected, onSelect, onPlay, onStudio, onInfo, onOptim
         typeof onInfo === 'function' && onInfo(data)
       },
       [onInfo, data]
-    ),
-    onCPlay = useCallback(
-      (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        typeof onPlay === 'function' && onPlay(data)
-      },
-      [onPlay, data]
-    ),
-    onCStudio = useCallback(
-      (e) => {
-        e.preventDefault()
-        e.stopPropagation()
-        typeof onStudio === 'function' && onStudio(data)
-      },
-      [onStudio, data]
     ),
     onCOptimizeAudio = useCallback(
       (e) => {
@@ -83,10 +65,8 @@ function TableCell ({data, selected, onSelect, onPlay, onStudio, onInfo, onOptim
       {data.cellLabelIcon && <p className={styles.cellImageLabel} title={data.cellLabelIconText}>{data.cellLabelIcon}</p>}
     </div>
     {
-      (onStudio || onPlay || onInfo || onOptimizeAudio || onEdit || onDownload || onDelete) &&
+      (onInfo || onOptimizeAudio || onEdit || onDownload || onDelete) &&
       <div className={styles.cellActionBar}>
-        {onStudio && <ButtonIconMicrophone title={getLocale('studio-edit-story')} onClick={onCStudio} className={styles.cellActionButton}/>}
-        {onPlay && <ButtonIconPlay title={getLocale('story-play')} onClick={onCPlay} className={styles.cellActionButton}/>}
         {onInfo && <ButtonIconInfo title={getLocale('infos')} onClick={onCInfo} className={styles.cellActionButton}/>}
         {onOptimizeAudio && <ButtonIconWave title={getLocale('telmios-optimize-audio')} onClick={onCOptimizeAudio} className={styles.cellActionButton}/>}
         {onEdit && <ButtonIconPen title={getLocale('edit-metadata')} onClick={onCEdit} className={styles.cellActionButton}/>}
