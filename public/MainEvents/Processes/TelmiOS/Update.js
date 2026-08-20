@@ -17,7 +17,8 @@ async function main (drive) {
 
   let json
   try {
-    json = await requestJson('https://api.github.com/repos/DantSu/Telmi-story-teller/releases', {})
+    // Unofficial battery-optimized TelmiOS fork (published as clean semver releases).
+    json = await requestJson('https://api.github.com/repos/jo65536/Telmi-story-teller/releases', {})
   } catch (e) {
     // Best-effort check: if GitHub is unreachable (offline, firewall), treat
     // the card as up to date rather than failing the whole connect.

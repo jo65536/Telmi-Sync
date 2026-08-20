@@ -50,7 +50,8 @@ async function main(drive) {
         return
       }
 
-      const json = await requestJson('https://api.github.com/repos/DantSu/Telmi-story-teller/releases', {})
+      // Unofficial battery-optimized TelmiOS fork (published as clean semver releases).
+      const json = await requestJson('https://api.github.com/repos/jo65536/Telmi-story-teller/releases', {})
 
       if (!json.length) {
         return process.stdout.write('success')
