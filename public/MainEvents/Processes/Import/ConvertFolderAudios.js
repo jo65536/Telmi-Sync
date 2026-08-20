@@ -63,8 +63,12 @@ function convertFolderAudios (folderPath) {
         onError: () => { finishOne(file, true); callback() }
       })
     } catch (e) {
+      // Defer: calling the pool callback synchronously here would re-enter
+      // runNext while this worker call is still on the stack and strand the
+      // pool slot, so success would never be written. onDone/onError already
+      // fire asynchronously; match that.
       finishOne(file, true)
-      callback()
+      queueMicrotask(callback)
     }
     return true
   }).then(() => process.stdout.write('success'))

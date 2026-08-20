@@ -91,7 +91,12 @@ function convertMusic (srcPath, opts = {}) {
             .then(stepCheckCover)
             .catch(stepCheckCover)
         })
-        .catch(onError)
+        .catch((e) => {
+          if (opts.claimedDst) {
+            opts.claimedDst.delete(musicDstPath)
+          }
+          onError(e)
+        })
     }
 
   audioExtractMetadata(srcPath, tmpMetadataTxtPath)

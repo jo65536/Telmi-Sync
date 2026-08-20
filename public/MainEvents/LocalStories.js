@@ -40,59 +40,72 @@ function mainEventLocalStoriesReader(mainWindow) {
     }
   )
 
-  let mergeTask = null
+  let mergeTask = null, mergeQueue = [], mergeCounter = 0
   ipcMain.on('local-stories-merge-cancel', async () => {
+    mergeQueue = []
     if (mergeTask !== null) {
       mergeTask.process.kill()
     }
   })
+  const runMerge = () => {
+    if (!mergeQueue.length) {
+      mergeTask = null
+      mainWindow.webContents.send('local-stories-merge-waiting', [])
+      mainWindow.webContents.send('local-stories-merge-task', '', '', 0, 0)
+      return ipcMain.emit('local-stories-get')
+    }
+    const story = mergeQueue.shift()
+    mainWindow.webContents.send('local-stories-merge-task', story.title, 'initialize', 0, 1)
+    mainWindow.webContents.send('local-stories-merge-waiting', mergeQueue)
+
+    // Unique tmp file per merge so overlapping forks never read each other spec.
+    const jsonPath = path.join(initTmpPath('json'), 'stories-merge-' + (mergeCounter++) + '.json')
+    fs.writeFileSync(jsonPath, JSON.stringify(story))
+
+    mergeTask = runProcess(
+      mainWindow,
+      path.join('Stories', 'StoriesMerge.js'),
+      [jsonPath],
+      () => {},
+      (message, current, total) => {
+        mainWindow.webContents.send('local-stories-merge-task', story.title, message, current, total)
+      },
+      (error) => {
+        mainWindow.webContents.send('local-stories-merge-error', story.title, error)
+      },
+      () => runMerge()
+    )
+  }
   ipcMain.on(
     'local-stories-merge',
     async (event, story) => {
-      mainWindow.webContents.send('local-stories-merge-task', story.title, 'initialize', 0, 1)
-      mainWindow.webContents.send('local-stories-merge-waiting', [])
-
-      const jsonPath = path.join(initTmpPath('json'), 'stories-merge.json')
-      fs.writeFileSync(jsonPath, JSON.stringify(story))
-
-      mergeTask = runProcess(
-        mainWindow,
-        path.join('Stories', 'StoriesMerge.js'),
-        [jsonPath],
-        () => {},
-        (message, current, total) => {
-          mainWindow.webContents.send('local-stories-merge-task', story.title, message, current, total)
-        },
-        (error) => {
-          mainWindow.webContents.send('local-stories-merge-error', story.title, error)
-        },
-        () => {
-          mergeTask = null
-          mainWindow.webContents.send('local-stories-merge-task', '', '', 0, 0)
-          ipcMain.emit('local-stories-get')
-        }
-      )
+      mergeQueue.push(story)
+      if (mergeTask === null) {
+        runMerge()
+      } else {
+        mainWindow.webContents.send('local-stories-merge-waiting', mergeQueue)
+      }
     }
   )
 
-  let optimizeTask = null, optimizeCancelled = false
+  let optimizeTask = null, optimizeQueue = []
   ipcMain.on('stories-optimize-audio-cancel', async () => {
-    optimizeCancelled = true
+    optimizeQueue = []
     if (optimizeTask !== null) {
       optimizeTask.process.kill()
     }
   })
-  const runOptimizeAudio = (stories) => {
-    if (optimizeCancelled || !stories.length) {
+  const runOptimizeAudio = () => {
+    if (!optimizeQueue.length) {
       optimizeTask = null
       mainWindow.webContents.send('stories-optimize-audio-waiting', [])
       mainWindow.webContents.send('stories-optimize-audio-task', '', '', 0, 0)
       return ipcMain.emit('local-stories-get')
     }
 
-    const story = stories.shift()
+    const story = optimizeQueue.shift()
     mainWindow.webContents.send('stories-optimize-audio-task', story.title, 'initialize', 0, 1)
-    mainWindow.webContents.send('stories-optimize-audio-waiting', stories)
+    mainWindow.webContents.send('stories-optimize-audio-waiting', optimizeQueue)
 
     optimizeTask = runProcess(
       mainWindow,
@@ -105,12 +118,16 @@ function mainEventLocalStoriesReader(mainWindow) {
       (error) => {
         mainWindow.webContents.send('stories-optimize-audio-error', story.title, error)
       },
-      () => runOptimizeAudio(stories)
+      () => runOptimizeAudio()
     )
   }
   ipcMain.on('stories-optimize-audio', async (event, stories) => {
-    optimizeCancelled = false
-    runOptimizeAudio(stories)
+    optimizeQueue = optimizeQueue.concat(stories)
+    if (optimizeTask === null) {
+      runOptimizeAudio()
+    } else {
+      mainWindow.webContents.send('stories-optimize-audio-waiting', optimizeQueue)
+    }
   })
 
   ipcMain.on(
