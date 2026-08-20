@@ -50,16 +50,28 @@ function TaskManagerProvider ({children}) {
     startTask = useCallback((name, dataSent, opts) => {
       clearDoneTimer(name)
       const conf = TASK_BY_NAME[name] || {}
-      upsert(name, {
-        label: (opts && opts.label) || conf.label || name,
-        cancellable: (opts && opts.cancellable !== undefined) ? opts.cancellable : !!conf.cancellable,
-        status: 'running',
-        errors: [],
-        items: [],
-        processing: {title: '', message: 'initialize', current: 0, total: 1}
+      setTasks((tasks) => {
+        const
+          existing = tasks[name],
+          // Re-triggering a task that is still running (e.g. dropping more
+          // files while an import runs, which the main process appends to its
+          // queue) must not wipe the errors/items/progress already reported —
+          // the main process never re-emits them. A genuinely fresh start
+          // (no running entry) gets a clean slate.
+          isRunning = existing !== undefined && (existing.status === 'running' || existing.status === 'cancelling' || existing.status === 'error'),
+          base = existing || {name, processing: null, waiting: [], items: [], errors: []}
+        return {...tasks, [name]: {
+          ...base,
+          label: (opts && opts.label) || conf.label || name,
+          cancellable: (opts && opts.cancellable !== undefined) ? opts.cancellable : !!conf.cancellable,
+          status: 'running',
+          errors: isRunning ? base.errors : [],
+          items: isRunning ? (base.items || []) : [],
+          processing: isRunning ? base.processing : {title: '', message: 'initialize', current: 0, total: 1}
+        }}
       })
       ipcRenderer.send(name, ...(Array.isArray(dataSent) ? dataSent : []))
-    }, [upsert, clearDoneTimer]),
+    }, [setTasks, clearDoneTimer]),
 
     cancelTask = useCallback((name) => {
       ipcRenderer.send(name + '-cancel')
