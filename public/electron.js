@@ -11,9 +11,7 @@ import mainEventTelmiOSStoriesReader from './MainEvents/TelmiOSStories.js'
 import mainEventTelmiOSMusicReader from './MainEvents/TelmiOSMusic.js'
 import mainEventUpdate from './MainEvents/Update.js'
 import mainEventLink from './MainEvents/Link.js'
-import mainEventStudio from './MainEvents/Studio.js'
 import mainEventTelmiSyncParams from './MainEvents/TelmiSyncParams.js'
-import mainEventPiperTTS from './MainEvents/PiperTTS.js'
 import mainEventAudio from './MainEvents/Audio.js'
 import mainEventFileManager from './MainEvents/FilesManager.js'
 import mainEventTableState from './MainEvents/TableState.js'
@@ -55,9 +53,7 @@ function createWindow() {
   mainEventTelmiOSStoriesReader(mainWindow)
   mainEventTelmiOSMusicReader(mainWindow)
   mainEventUpdate(mainWindow)
-  mainEventStudio(mainWindow)
   mainEventTelmiSyncParams(mainWindow)
-  mainEventPiperTTS(mainWindow)
   mainEventAudio(mainWindow)
   mainEventTableState(mainWindow)
 

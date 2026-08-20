@@ -43,9 +43,6 @@ function StoriesTable({
                         id,
                         emptyMessage,
                         titleLocaleKey,
-                        onPlay,
-                        onAdd,
-                        onStudio,
                         onEdit,
                         onEditSelected,
                         onDelete,
@@ -187,9 +184,6 @@ function StoriesTable({
                 selectedData={selectedStories}
                 onSelect={onSelect}
                 onSelectAll={onSelectAll}
-                onStudio={onStudio}
-                onPlay={onPlay}
-                onAdd={onAdd}
                 onOptimizeAudio={onOptimizeAudio}
                 onOptimizeAudioSelected={onOptimizeAudioSelected}
                 onEdit={onEdit !== undefined ? callbackOnEdit : undefined}
