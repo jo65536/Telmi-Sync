@@ -137,7 +137,8 @@ function mainEventLocalStoriesReader(mainWindow) {
     async (event, stories) => {
       deleteStories(
         mainWindow,
-        stories.map((s) => s.path),
+        'local-stories-delete',
+        stories,
         () => ipcMain.emit('local-stories-get')
       )
     }

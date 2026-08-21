@@ -317,6 +317,8 @@ const fr = {
   'task-telmios-eject': 'Éjection de la carte',
   'task-telmios-cardmaker': 'Création de la carte Telmi',
   'task-telmios-update': 'Mise à jour de TelmiOS',
+  'task-stories-delete': 'Suppression d\'histoires',
+  'stories-delete-error': 'Impossible de supprimer une histoire',
   'importing-audio': 'Importation des audios',
   'no-audio-found': 'Aucun fichier audio trouvé dans ce dossier',
   'filter-not-on-device': 'Afficher seulement ce qui n\'est pas sur la boîte',

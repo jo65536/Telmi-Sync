@@ -2,6 +2,7 @@ import {useCallback, useMemo} from 'react'
 import {useModal} from '../../../Components/Modal/ModalHooks.js'
 import {useLocale} from '../../../Components/Locale/LocaleHooks.js'
 import {useTelmiOS} from '../../../Components/TelmiOS/TelmiOSHooks.js'
+import {useTaskManager} from '../../../Components/TaskManager/TaskManagerHooks.js'
 import {useLocalStories} from '../../../Components/LocalStories/LocalStoriesHooks.js'
 
 import StoriesTable from './StoriesTable.js'
@@ -16,6 +17,7 @@ function StoriesLocalContent({setSelectedStories, selectedStories}) {
     localStories = useLocalStories(),
     {stories: telmiOSStories} = useTelmiOS(),
     {addModal, rmModal} = useModal(),
+    {startTask} = useTaskManager(),
 
     stories = useMemo(
       () => {
@@ -62,8 +64,8 @@ function StoriesLocalContent({setSelectedStories, selectedStories}) {
       []
     ),
     onDelete = useCallback(
-      (stories) => ipcRenderer.send('local-stories-delete', stories),
-      []
+      (stories) => startTask('local-stories-delete', [stories]),
+      [startTask]
     ),
     additionalHeaderButtons = useMemo(
       () => selectedStories.length < 2 ? undefined :

@@ -317,6 +317,8 @@ const en = {
   'task-telmios-eject': 'Ejecting the card',
   'task-telmios-cardmaker': 'Creating the Telmi card',
   'task-telmios-update': 'Updating TelmiOS',
+  'task-stories-delete': 'Deleting stories',
+  'stories-delete-error': 'Unable to delete a story',
   'importing-audio': 'Importing audio files',
   'no-audio-found': 'No audio file found in this folder',
   'filter-not-on-device': 'Show only what is not on the box',
