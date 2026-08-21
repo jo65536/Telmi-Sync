@@ -48,8 +48,14 @@ function convertFolderSTUdio (srcPath, storyName) {
       stageNodes = [...studioData.stageNodes],
       firstStageNode = stageNodes.shift(),
 
+      // Some community packs ship a story.json with an empty title or the
+      // literal "MISSING_PACK_TITLE" placeholder: treat those as missing and
+      // fall back to the archive/folder name, like a non-string title.
+      studioTitle = typeof studioData.title === 'string' ? studioData.title.trim() : '',
       {title, age: titleAge} = findAgeInStoryName(
-        typeof studioData.title === 'string' ? studioData.title : (storyName || path.basename(srcPath))
+        studioTitle !== '' && studioTitle !== 'MISSING_PACK_TITLE'
+          ? studioTitle
+          : (storyName || path.basename(srcPath))
       ),
       age = typeof studioData.age === 'number' ? studioData.age : (
         typeof studioData.age === 'string' && studioData.age !== '' && !isNaN(parseInt(studioData.age, 10)) ?
