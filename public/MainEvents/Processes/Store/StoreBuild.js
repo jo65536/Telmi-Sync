@@ -476,15 +476,37 @@ function main(jsonPath) {
                         countFiles,
                         (index) => {
                           process.stdout.write('*converting-images*' + (index++) + '*' + countFiles + '*')
-                          convertCoverImage(srcImagesMain[0], path.join(dstPath, 'cover.png'))
-                            .then(() => {
+
+                          const
+                            coverPath = path.join(dstPath, 'cover.png'),
+                            // A download can "succeed" yet hold an unreadable body (empty
+                            // response, HTML error page…). Rather than fail the whole pack
+                            // on a single bad cover, try the preferred cover first, then
+                            // fall back to any other image that was fetched successfully.
+                            coverSources = [...new Set([srcImagesMain[0], ...Object.values(srcLocalImage)].filter(Boolean))],
+                            writeAndFinish = () => {
                               process.stdout.write('*writing-metadata*' + index + '*' + countFiles + '*')
                               fs.writeFileSync(path.join(dstPath, 'nodes.json'), JSON.stringify(nodes))
                               fs.writeFileSync(path.join(dstPath, 'notes.json'), JSON.stringify(notes))
                               fs.writeFileSync(path.join(dstPath, 'metadata.json'), JSON.stringify(metadata))
                               process.stdout.write('success')
-                            })
-                            .catch(() => process.stderr.write('file-not-found'))
+                            },
+                            buildCover = (i, lastError) => {
+                              if (i >= coverSources.length) {
+                                return process.stderr.write(lastError ? lastError.toString() : 'file-not-found')
+                              }
+                              convertCoverImage(coverSources[i], coverPath)
+                                .then(() => {
+                                  try {
+                                    writeAndFinish()
+                                  } catch (e) {
+                                    process.stderr.write(e.toString())
+                                  }
+                                })
+                                .catch((e) => buildCover(i + 1, e))
+                            }
+
+                          buildCover(0, null)
                         },
                         false,
                         false
