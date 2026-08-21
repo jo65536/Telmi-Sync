@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useTelmiOS } from '../../../Components/TelmiOS/TelmiOSHooks.js'
 import { useModal } from '../../../Components/Modal/ModalHooks.js'
+import { useTaskManager } from '../../../Components/TaskManager/TaskManagerHooks.js'
 
 import StoriesTable from './StoriesTable.js'
 import ModalStoriesTransfer from './ModalStoriesTransfer.js'
@@ -8,16 +9,15 @@ import TelmiOSLayout from '../TelmiOS/TelmiOSLayout.js'
 
 import styles from '../Synchronize.module.scss'
 
-const {ipcRenderer} = window.require('electron')
-
 function StoriesTelmiOSContent ({selectedLocalStories, setSelectedLocalStories}) {
   const
     {addModal, rmModal} = useModal(),
+    {startTask} = useTaskManager(),
     telmiOS = useTelmiOS(),
     [selectedTelmiOSStories, setSelectedTelmiOSStories] = useState([]),
     onDelete = useCallback(
-      (stories) => ipcRenderer.send('telmios-stories-delete', telmiOS, stories),
-      [telmiOS]
+      (stories) => startTask('telmios-stories-delete', [telmiOS, stories]),
+      [telmiOS, startTask]
     ),
     onTransfer = useCallback(
       () => {

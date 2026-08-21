@@ -32,7 +32,8 @@ function mainEventTelmiOSStoriesReader(mainWindow) {
       if (telmiDevice !== null) {
         deleteStories(
           mainWindow,
-          stories.map((s) => s.path),
+          'telmios-stories-delete',
+          stories,
           () => {
             ipcMain.emit('telmios-stories-get', event, telmiDevice)
             ipcMain.emit('telmios-diskusage', event, telmiDevice)
