@@ -225,6 +225,7 @@ const fr = {
   'story-converting': 'Conversion de l\'histoire',
   'story-download': 'Téléchargement de l\'histoire',
   'story-format-invalid': 'Format d\'histoire invalide',
+  'story-format-locked': 'Verrouillée sur une console — non importable',
   'story-studio-format-invalid': 'Format d\'histoire STUdio invalide',
   'story-edit': 'Editer l\'histoire',
   'story-delete': 'Supprimer l\'histoire',
