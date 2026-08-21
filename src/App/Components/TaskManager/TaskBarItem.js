@@ -27,7 +27,7 @@ function TaskBarItem ({task, onCancel, onDismiss}) {
         msgKey = rawMsg.split(' : ')[0],
         localizedMsg = getLocale(msgKey),
         primary = isPath ? baseName(errTask) : getLocale(errTask),
-        secondary = isPath ? (localizedMsg !== msgKey ? localizedMsg : rawMsg) : rawMsg
+        secondary = localizedMsg !== msgKey ? localizedMsg : rawMsg
       return secondary ? primary + ' — ' + secondary : primary
     },
 

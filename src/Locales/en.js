@@ -225,6 +225,7 @@ const en = {
   'story-converting': 'Converting the story',
   'story-download': 'Downloading the story',
   'story-format-invalid': 'Invalid story format',
+  'story-format-locked': 'Locked to a device — cannot be imported',
   'story-studio-format-invalid': 'Invalid STUdio story format',
   'story-edit': 'Edit the story',
   'story-delete': 'Delete the story',

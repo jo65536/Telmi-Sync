@@ -44,6 +44,16 @@ function convertFolderFS (srcPath, storyName) {
 
   process.stdout.write('*story-reading-metadata*1*' + countFiles + '*')
 
+  // Asset-index entries must decode to "NNN\\filename". When they don't, the
+  // story is ciphered with a key we don't have (a device-locked dump that was
+  // never re-ciphered for sharing) — fail cleanly instead of crashing later on
+  // path.join(undefined).
+  const isValidAsset = (e) => typeof e === 'string' && /^\d{3}\\/.test(e)
+  if (!ri || !si || !ri.every(isValidAsset) || !si.every(isValidAsset)) {
+    process.stderr.write('story-format-locked')
+    return
+  }
+
   const
 
     findNewName = (currentName, suffix, objectNames) => {
@@ -207,8 +217,19 @@ function convertFolderFS (srcPath, storyName) {
           index,
           countFiles,
           () => {
-            fs.copyFileSync(path.join(dstImagesPath, firstStageNode.image), path.join(dstPath, metadata.image))
-            fs.copyFileSync(path.join(dstAudiosPath, firstStageNode.audio), path.join(dstPath, 'title.mp3'))
+            // Some stories have a start node (s0) with no cover image and/or
+            // no title audio (asset index -1 -> renameImage/Audio returns null).
+            // Fall back to the first node that does have one so title.png /
+            // title.mp3 still get written instead of path.join crashing on null.
+            const
+              coverImage = firstStageNode.image || Object.values(stages).map((s) => s.image).find(Boolean),
+              coverAudio = firstStageNode.audio || Object.values(stages).map((s) => s.audio).find(Boolean)
+            if (coverImage) {
+              fs.copyFileSync(path.join(dstImagesPath, coverImage), path.join(dstPath, metadata.image))
+            }
+            if (coverAudio) {
+              fs.copyFileSync(path.join(dstAudiosPath, coverAudio), path.join(dstPath, 'title.mp3'))
+            }
             process.stdout.write('success')
           },
           false,
